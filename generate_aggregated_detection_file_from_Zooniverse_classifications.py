@@ -38,11 +38,6 @@ ________________________________________________
 
 import json
 import csv
-import glob
-import os
-import utils
-from datetime import datetime
-import pickle
 
 
 PNG_DIRECTORY = "input/png/"
@@ -94,13 +89,14 @@ with open(zooniverse_classification_file) as csvfile:
                                ' left (px)': int(x),
                                ' bottom (px)': int(y),
                                ' right (px)': int(x+width),
-                              })                              
+                              })                         
                  if not filename in identifications.keys():
                      identifications[filename] = {username: meteors}
                  elif not username in identifications[filename].keys():
                      identifications[filename][username] = meteors
-                 else:
-                     identifications[filename][username].append(meteors)
+                 else: #normally this case should never happen!!!
+                     print '[WARNING] User %s processed more than once spectrogram %s' % (username, filename) 
+                     #identifications[filename][username].append(meteors)
 
 ### Generate aggregated BRAMS detection file ###
 
@@ -112,6 +108,8 @@ for spectrogram, content in identifications.iteritems():
         if tmp is not None:        
             detection_files[user] = tmp
     threshold_image = calculate_threshold_image(detection_files)
+    if len(threshold_image) == 0: #no meteors detected in this spectrogram
+        continue
     alpha = 4
     binary_image = threshold_image[threshold_image.keys()[0]].copy() 
     binary_image[binary_image < alpha] = 0
@@ -138,9 +136,7 @@ for spectrogram, content in identifications.iteritems():
         meteors.append(dict)
     aggregated_identifications[spectrogram] = meteors
 
-
 ### Output aggregated BRAMS detection file ###
-
 output_filename = "output/aggregated/20160101_0000_BEUCCL_aggregated-%s.csv" % DATE
 with open(output_filename, 'wb') as csvfile:
     fieldnames = ['filename','file_start','start (s)','end (s)','frequency_min (Hz)','frequency_max (Hz)',
@@ -148,6 +144,6 @@ with open(output_filename, 'wb') as csvfile:
                       'overlap','color_min','color_max']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)    
     writer.writeheader()
-    for spectrogram, data in aggregated_identifications.iteritems():
-        data.sort(key=lambda element: (element['filename'], element[' left (px)']))
+    for spectrogram, data in sorted(aggregated_identifications.iteritems()):
+        data.sort(key=lambda element: element[' left (px)'])
         writer.writerows(data)
