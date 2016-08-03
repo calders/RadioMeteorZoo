@@ -57,7 +57,6 @@ for file in glob.glob('input/png/tmp/*.png'):
     subject.links.project = project
     subject.add_location(file)
     # You can set whatever metadata you want, or none at all
-    # filename, file_start, sample_rate (Hz), fft, overlap, color_min, color_max
     subject.metadata['filename'] = os.path.basename(file)
     #TODO subject.metadata['file_start'] = 
     subject.metadata['sample_rate'] = 5512
@@ -65,6 +64,8 @@ for file in glob.glob('input/png/tmp/*.png'):
     subject.metadata['overlap'] = 90
     #TODO subject.metadata['color_min'] =
     #TODO subject.metadata['color_max'] =
+    #TODO subject.metadata['width'] =
+    #TODO subject.metadata['height'] =    
     for attempt in range(10):  
         try:
             subject.save()

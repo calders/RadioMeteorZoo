@@ -52,7 +52,7 @@ def color_gradient ( val, beg_rgb, end_rgb, val_min = 0, val_max = 1):
              beg_rgb[1] + val_scale * (end_rgb[1] - beg_rgb[1]),
              beg_rgb[2] + val_scale * (end_rgb[2] - beg_rgb[2]))
 
-(datetime,identifications,volunteers) = pickle.load( open( "output/pickles/brams_zoo_meteor_identification-"+DATE+".p", "rb" ) )
+(datetime,identifications,volunteers) = pickle.load( open( "output/pickles/brams_zoo_meteor_identification-"+str(DATE)+".p", "rb" ) )
 
 df = pd.DataFrame({'counts': identifications, 'classifications': volunteers, 'spectrograms': 1}, index=datetime)
 binned = df.resample('1H', how='sum')

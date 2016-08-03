@@ -38,8 +38,14 @@ ________________________________________________
 
 import json
 import csv
+import glob
+import os
 
 DATE = date #20160714
+
+#remove old files
+for file in glob.glob("input/csv/*.csv"):
+    os.remove(file)
 
 zooniverse_classification_file = "input/radio-meteor-zoo-classifications-%s.csv" % DATE
 output = {}

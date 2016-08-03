@@ -60,7 +60,7 @@ optimal_nbr_of_counters = {1: 1, #k: optimal_nbr_of_counters
                            8: 3,
                            9: 4,
                            10: 4}
-datetime, identifications, volunteers = [], [], []
+date_time, identifications, volunteers = [], [], []
 for spectrogram in spectrograms:
     dt = datetime.strptime(spectrogram[11:24], "%Y%m%d_%H%M")
     #Step 1: read detection file
@@ -80,10 +80,10 @@ for spectrogram in spectrograms:
         binary_image[binary_image >= alpha] = 1
         border_threshold = detect_border(binary_image)
         nbr_identifications = len(border_threshold)
-        datetime.append(dt) #datetime
+        date_time.append(dt) #datetime
         identifications.append(nbr_identifications) #nbr of identifications
         volunteers.append(nbr_volunteers) #nbr of volunteers checking the file
     else:
         print "[warning] spectrogram %s has %d volunteers" % (spectrogram,nbr_volunteers)
 
-pickle.dump( (datetime,identifications,volunteers), open( "output/pickles/brams_zoo_meteor_identification-"+DATE+".p", "wb" ) ) 
+pickle.dump( (date_time,identifications,volunteers), open( "output/pickles/brams_zoo_meteor_identification-"+str(DATE)+".p", "wb" ) ) 
