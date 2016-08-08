@@ -54,13 +54,21 @@ if os.environ.has_key("ZOO_PASSWORD"):
   password = os.environ["ZOO_PASSWORD"]
 if os.environ.has_key("ZOO_SUBJECTSET"):
   subject_set_display_name = os.environ["ZOO_SUBJECTSET"]
+if os.environ.has_key("BRAMS_STATION"):
+  station = os.environ["BRAMS_STATION"]
 
 Panoptes.connect(username=username, password=password)
 
 project = Project.find(slug='stijnc/untitled-project-2015-07-08t13-16-53-dot-409z')
 #Update subjects
 subjects = []
-for file in glob.glob('input/png/*.png'):
+files = glob.glob('/data/incoming/brams/ZOO/'+station+'/*.png')
+if len(files) == 0:
+  raise Error('Error finding PNG files. Did you specify correct station?','/data/incoming/brams/ZOO/'+station+'/*.png')
+metadata = open('/data/incoming/brams/'+station+'.zoo','r')
+(fft,overlap,color_min,color_max) = metadata.readlines()
+
+for file in files:
     print "Uploading file %s" % file
     subject = Subject()
     subject.links.project = project
@@ -69,15 +77,17 @@ for file in glob.glob('input/png/*.png'):
     subject.metadata['filename'] = os.path.basename(file)
     #TODO subject.metadata['file_start'] = 
     subject.metadata['sample_rate'] = 5512
-    subject.metadata['fft'] = 16384
-    subject.metadata['overlap'] = 90
-    #TODO subject.metadata['color_min'] =
-    #TODO subject.metadata['color_max'] =
+    subject.metadata['fft'] = fft 
+    subject.metadata['overlap'] = overlap
+    subject.metadata['color_min'] = color_min
+    subject.metadata['color_max'] = color_max
     #TODO subject.metadata['width'] =
     #TODO subject.metadata['height'] =    
     for attempt in range(10):  
         try:
             subject.save()
+        except KeyboardInterrupt:
+            raise
         except:
             continue
         else:
