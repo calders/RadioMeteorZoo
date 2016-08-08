@@ -42,16 +42,25 @@ import glob
 import os
 import time
 
+print "[PYTHON] Create a subject set and upload new subjects to it"
+
 start_time = time.time()
 
 subject_set_display_name = 'My new subject set314'
+
+if os.environ.has_key("ZOO_USERNAME"):
+  username = os.environ["ZOO_USERNAME"]
+if os.environ.has_key("ZOO_PASSWORD"):
+  password = os.environ["ZOO_PASSWORD"]
+if os.environ.has_key("ZOO_SUBJECTSET"):
+  subject_set_display_name = os.environ["ZOO_SUBJECTSET"]
 
 Panoptes.connect(username=username, password=password)
 
 project = Project.find(slug='stijnc/untitled-project-2015-07-08t13-16-53-dot-409z')
 #Update subjects
 subjects = []
-for file in glob.glob('input/png/tmp/*.png'):
+for file in glob.glob('input/png/*.png'):
     print "Uploading file %s" % file
     subject = Subject()
     subject.links.project = project
@@ -81,10 +90,11 @@ for subject_set in project.links.subject_sets:
         subject_set = SubjectSet.find(subject_set_id)
         break
 else:
-    subject_set = SubjectSet()
-    subject_set.links.project = project
-    subject_set.display_name = subject_set_display_name 
-    subject_set.save()
+    #subject_set = SubjectSet()
+    #subject_set.links.project = project
+    #subject_set.display_name = subject_set_display_name 
+    #subject_set.save()
+    raise Exception('Subject set does not exist')
 subject_set.add_subjects(subjects) # SubjectSet.add_subjects() can take a list of Subjects, or just one.
 
 print("--- %s seconds ---" % (time.time() - start_time))
