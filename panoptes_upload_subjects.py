@@ -41,12 +41,11 @@ from panoptes_client import SubjectSet, Subject, Project, Panoptes
 import glob
 import os
 import time
+import sys
 
 print "[PYTHON] Create a subject set and upload new subjects to it"
 
 start_time = time.time()
-
-subject_set_display_name = 'My new subject set314'
 
 if os.environ.has_key("ZOO_USERNAME"):
   username = os.environ["ZOO_USERNAME"]
@@ -56,10 +55,12 @@ if os.environ.has_key("ZOO_SUBJECTSET"):
   subject_set_display_name = os.environ["ZOO_SUBJECTSET"]
 if os.environ.has_key("BRAMS_STATION"):
   station = os.environ["BRAMS_STATION"]
+#if os.environ.has_key("DATE"):
+#  date = os.environ["DATE"]
 
 Panoptes.connect(username=username, password=password)
 
-project = Project.find(slug='stijnc/untitled-project-2015-07-08t13-16-53-dot-409z')
+project = Project.find(slug='zooniverse/radio-meteor-zoo')
 #Update subjects
 subjects = []
 files = glob.glob('/data/incoming/brams/ZOO/'+station+'/*.png')
@@ -68,31 +69,30 @@ if len(files) == 0:
 metadata = open('/data/incoming/brams/'+station+'.zoo','r')
 (fft,overlap,color_min,color_max) = metadata.readlines()
 
+#Create uploaded directory if necessary
+dest = '/data/incoming/brams/ZOO/'+station+'/uploaded/'
+if not(os.path.isdir(dest)):
+    os.mkdir(dest)
+
 for file in files:
     print "Uploading file %s" % file
+    sys.stdout.flush()
     subject = Subject()
     subject.links.project = project
     subject.add_location(file)
     # You can set whatever metadata you want, or none at all
     subject.metadata['filename'] = os.path.basename(file)
     #TODO subject.metadata['file_start'] = 
-    subject.metadata['sample_rate'] = 5512
+    #TODO subject.metadata['sample_rate'] = 5512
     subject.metadata['fft'] = fft 
     subject.metadata['overlap'] = overlap
     subject.metadata['color_min'] = color_min
     subject.metadata['color_max'] = color_max
     #TODO subject.metadata['width'] =
     #TODO subject.metadata['height'] =    
-    for attempt in range(10):  
-        try:
-            subject.save()
-        except KeyboardInterrupt:
-            raise
-        except:
-            continue
-        else:
-            break
+    subject.save()
     subjects.append(subject)
+    os.rename(file,dest+os.path.basename(file)) #move file to uploaded directory
 #Create a new subject set or append the subjects to an existing one
 for subject_set in project.links.subject_sets:
     if str(subject_set.display_name) == subject_set_display_name:
@@ -105,6 +105,6 @@ else:
     #subject_set.display_name = subject_set_display_name 
     #subject_set.save()
     raise Exception('Subject set does not exist')
-subject_set.add_subjects(subjects) # SubjectSet.add_subjects() can take a list of Subjects, or just one.
+subject_set.add(subjects) # SubjectSet.add_subjects() can take a list of Subjects, or just one.
 
 print("--- %s seconds ---" % (time.time() - start_time))
