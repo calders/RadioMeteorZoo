@@ -55,6 +55,7 @@ if os.environ.has_key("ZOO_SUBJECTSET"):
   subject_set_display_name = os.environ["ZOO_SUBJECTSET"]
 if os.environ.has_key("BRAMS_STATION"):
   station = os.environ["BRAMS_STATION"]
+station = "BEHUMA_13"
 #if os.environ.has_key("DATE"):
 #  date = os.environ["DATE"]
 
@@ -65,7 +66,7 @@ project = Project.find(slug='zooniverse/radio-meteor-zoo')
 subjects = []
 files = glob.glob('/data/incoming/brams/ZOO/'+station+'/*.png')
 if len(files) == 0:
-  raise Error('Error finding PNG files. Did you specify correct station?','/data/incoming/brams/ZOO/'+station+'/*.png')
+  raise Exception('Error finding PNG files. Did you specify correct station? (/data/incoming/brams/ZOO/'+station+'/*.png)')
 metadata = open('/data/incoming/brams/'+station+'.zoo','r')
 (fft,overlap,color_min,color_max) = metadata.readlines()
 
