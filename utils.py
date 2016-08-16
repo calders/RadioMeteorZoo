@@ -122,22 +122,23 @@ def random_combination(iterable, nbr_of_samples):
     indices = sorted(random.sample(xrange(population_size), nbr_of_samples))
     return [pool[i] for i in indices]
 
-def detect_borders(detections):
+def detect_borders(detections, minimum_width=None):
     """Wrapper function to detect the borders of a rectangle"""
     borders = {}
     for file, detection in detections.iteritems():
-        border = detect_border(detection)
+        border = detect_border(detection, minimum_width)
         borders[file] = border
     return borders
     
-def detect_border(detection):
+def detect_border(detection, minimum_width=None):
     """Detect the borders of a rectangle using a bounding box algorithm"""
     lw, num = measurements.label(detection) #labels connected regions
     border = []
     for nbr in range(1, num+1):
         B = argwhere(lw == nbr) #take one of the labeled regions
         (xstart, ystart), (xstop, ystop) = B.min(0), B.max(0) #find min & max (x,y) value of this region
-        border.append([xstart, ystart, xstop, ystop])
+        if minimum_width == None or xstop-xstart >= minimum_width:
+            border.append([xstart, ystart, xstop, ystop])
     return border
 
 def is_intersection(rect_a, rect_b):
