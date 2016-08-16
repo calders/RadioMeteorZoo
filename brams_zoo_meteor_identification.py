@@ -39,16 +39,27 @@ ________________________________________________
 import glob
 import os
 import utils
-from datetime import datetime
+from datetime import date, datetime, timedelta
 import pickle
 
 PNG_DIRECTORY = "input/png/"
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/"
 MASKSIZE = (595, 864)
-DATE = date #20160714
+DATE = classification_date #20160714
+minimum_width = 100
 
-spectrograms = map(os.path.basename,glob.glob(PNG_DIRECTORY+"*.png"))
+def perdelta(start, end, delta):
+    curr = start
+    while curr < end:
+        yield curr
+        curr += delta
+
+spectrograms = []
+for result in perdelta(datetime(2016, 8, 10), datetime(2016, 8, 14), timedelta(minutes=5)):
+     spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_BEHUMA_SYS001.png")
+
+
 csv_files = glob.glob(CSV_DIRECTORY+"*.csv")
 optimal_nbr_of_counters = {1: 1, #k: optimal_nbr_of_counters
                            2: 2,
@@ -78,7 +89,7 @@ for spectrogram in spectrograms:
         binary_image = threshold_image[threshold_image.keys()[0]].copy() 
         binary_image[binary_image < alpha] = 0
         binary_image[binary_image >= alpha] = 1
-        border_threshold = detect_border(binary_image)
+        border_threshold = detect_border(binary_image,minimum_width=minimum_width)
         nbr_identifications = len(border_threshold)
         date_time.append(dt) #datetime
         identifications.append(nbr_identifications) #nbr of identifications
