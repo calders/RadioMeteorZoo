@@ -40,8 +40,9 @@ import json
 import csv
 import glob
 import os
+import re
 
-DATE = date #20160714
+DATE = classification_date #20160714
 
 #remove old files
 for file in glob.glob("input/csv/*.csv"):
@@ -55,7 +56,13 @@ with open(zooniverse_classification_file) as csvfile:
          if row['workflow_version'] == "17.47":
              username = row['user_name']
              subject = json.loads(row['subject_data'])
-             filename = subject[subject.keys()[0]]['Filename']
+             if 'Filename' in subject[subject.keys()[0]]:
+                 filename = subject[subject.keys()[0]]['Filename']
+             else:
+                 filename = subject[subject.keys()[0]]['filename']                     
+             pattern = re.compile("RAD_BEDOUR_2016081.*_BEHUMA_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
+             if not pattern.match(filename):
+                 continue
              annotations = json.loads(row['annotations'])
              metadata = json.loads(row['metadata'])
              if 'seen_before' in metadata.keys() and metadata['seen_before'] == True:
@@ -89,7 +96,7 @@ with open(zooniverse_classification_file) as csvfile:
                      output[username].append(dict)
 
 for username, data in output.iteritems():
-    output_filename = "input/csv/20160101_0000_BEUCCL_%s.csv" % username
+    output_filename = "input/csv/20160810_0000_BEUCCL_%s.csv" % username
     with open(output_filename, 'wb') as csvfile:
         fieldnames = ['filename','file_start','start (s)','end (s)','frequency_min (Hz)','frequency_max (Hz)',
                       'type',' top (px)',' left (px)',' bottom (px)',' right (px)','sample_rate (Hz)','fft',

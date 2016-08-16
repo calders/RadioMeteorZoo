@@ -44,7 +44,7 @@ import matplotlib
 
 matplotlib.use('Agg')
 
-DATE = date #20160714
+DATE = classification_date #20160714
 
 def color_gradient ( val, beg_rgb, end_rgb, val_min = 0, val_max = 1):
     val_scale = (1.0 * val - val_min) / (val_max - val_min)
@@ -64,8 +64,8 @@ fig.patch.set_facecolor('white')
 ax1 = plt.subplot(2, 1, 1)
 plt.plot(binned.index, binned.counts, marker='None', lw=2)
 plt.gcf().autofmt_xdate()
-plt.title("Radio Meteor Zoo\n (Quadrantids 2016, Uccle receiving station)",size=20,weight='bold')
-plt.ylabel('Meteor activity',size=16,style='italic')
+plt.title("Radio Meteor Zoo\n (Perseids 2016, Humain receiving station)",size=18,weight='bold')
+plt.ylabel('Meteor activity\n (min. width = 100px)',size=16,style='italic')
 plt.yticks(size=14)
 plt.ylim([0,1.2*max(binned.counts)])
 plt.xlim([binned.index.min(), binned.index.max()])
@@ -95,4 +95,4 @@ ax2.xaxis.set_major_formatter(xfmt)
 plt.yticks(size=14)
 plt.ylim(0, 100)
 plt.ylabel("Classification\ncompleteness (%)",size=16,style='italic')
-plt.savefig("output/plots/motivate_volunteers-%s.png" % DATE, figsize=(16,9), dpi=300)
+plt.savefig("output/plots/Perseids2016-%s.png" % DATE, figsize=(16,9), dpi=300)
