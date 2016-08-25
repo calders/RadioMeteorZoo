@@ -42,7 +42,7 @@ import glob
 import os
 import re
 
-DATE = classification_date #20160714
+DATE = str(classification_date) #20160714
 
 #remove old files
 for file in glob.glob("input/csv/*.csv"):
@@ -60,7 +60,7 @@ with open(zooniverse_classification_file) as csvfile:
                  filename = subject[subject.keys()[0]]['Filename']
              else:
                  filename = subject[subject.keys()[0]]['filename']                     
-             pattern = re.compile("RAD_BEDOUR_2016081.*_BEHUMA_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
+             pattern = re.compile("RAD_BEDOUR_201601.*_BEUCCL_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
              if not pattern.match(filename):
                  continue
              annotations = json.loads(row['annotations'])
