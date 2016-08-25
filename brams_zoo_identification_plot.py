@@ -41,20 +41,41 @@ import pandas as pd
 import pickle
 import matplotlib.dates as md
 import matplotlib
+import sidereal #http://infohost.nmt.edu/tcc/help/lang/python/examples/sidereal/ims/sidereal.py
+import numpy as np
+from scipy import interpolate
+from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
 
 matplotlib.use('Agg')
 
 DATE = classification_date #20160714
+show_radiant_altitude = True
+lat = np.deg2rad(50.85)  # latitude of the receiving station [°]
+lon = np.deg2rad(4.35)   # longitude of the receiving station [°]
+rad_pos = {datetime(2016, 8, 10): [45,57], # radiant position (RA,Dec) for a given date
+           datetime(2016, 8, 15): [51,58]}
 
-def color_gradient ( val, beg_rgb, end_rgb, val_min = 0, val_max = 1):
+def color_gradient ( val, beg_rgb=(1.0, 0.0, 0.0), end_rgb=(0.0, 1.0, 0.0), val_min = 0, val_max = 100):
     val_scale = (1.0 * val - val_min) / (val_max - val_min)
-    return ( beg_rgb[0] + 0.5 * val_scale * (end_rgb[0] - beg_rgb[0]),
-             beg_rgb[1] + val_scale * (end_rgb[1] - beg_rgb[1]),
-             beg_rgb[2] + val_scale * (end_rgb[2] - beg_rgb[2]))
+    red = max([min([beg_rgb[0] + 0.5 * val_scale * (end_rgb[0] - beg_rgb[0]),1]),0])
+    green = max([min([beg_rgb[1] + val_scale * (end_rgb[1] - beg_rgb[1]),1]),0])
+    blue = max([min([beg_rgb[2] + val_scale * (end_rgb[2] - beg_rgb[2]),1]),0])
+    return ( red, green, blue )
 
-(datetime,identifications,volunteers) = pickle.load( open( "output/pickles/brams_zoo_meteor_identification-"+str(DATE)+".p", "rb" ) )
+def perdelta(start, end, delta):
+    curr = start
+    while curr < end:
+        yield curr
+        curr += delta
 
-df = pd.DataFrame({'counts': identifications, 'classifications': volunteers, 'spectrograms': 1}, index=datetime)
+def toJD(dt):
+    JD = float(sidereal.JulianDate.fromDatetime(dt))
+    return JD
+
+(dt,identifications,volunteers) = pickle.load( open( "output/pickles/brams_zoo_meteor_identification-"+str(DATE)+".p", "rb" ) )
+
+df = pd.DataFrame({'counts': identifications, 'classifications': volunteers, 'spectrograms': 1}, index=dt)
 binned = df.resample('1H', how='sum')
 binned.classifications_per_spectrogram = binned.classifications / binned.spectrograms
 binned.percentage_completed = 100 * binned.classifications / (10 * binned.spectrograms)
@@ -65,7 +86,7 @@ ax1 = plt.subplot(2, 1, 1)
 plt.plot(binned.index, binned.counts, marker='None', lw=2)
 plt.gcf().autofmt_xdate()
 plt.title("Radio Meteor Zoo\n (Perseids 2016, Humain receiving station)",size=18,weight='bold')
-plt.ylabel('Meteor activity\n (min. width = 100px)',size=16,style='italic')
+plt.ylabel('Meteor activity',size=16,style='italic',color='blue')
 plt.yticks(size=14)
 plt.ylim([0,1.2*max(binned.counts)])
 plt.xlim([binned.index.min(), binned.index.max()])
@@ -76,15 +97,25 @@ ax1.fill_between(binned.index, 0, binned.counts, alpha=.3)
 ax1.spines["top"].set_visible(False)    
 ax1.spines["right"].set_visible(False)
 
+# Plot radiant altitude
+if show_radiant_altitude:
+    JDs = map(toJD,rad_pos.keys())
+    pos = np.deg2rad(rad_pos.values()).tolist()
+    retrieve = interpolate.interp1d(JDs, pos, axis=0)
+    ax1b = ax1.twinx()
+    for utc in perdelta(min(dt), max(dt), timedelta(minutes=60)):
+        RA, Dec = retrieve(toJD(utc))
+        equ_coord = sidereal.RADec(RA,Dec)
+        h = equ_coord.hourAngle(utc,lon)
+        horiz_coord = equ_coord.altAz(h,lat)
+        ax1b.set_ylabel('Radiant altitude [$\degree$]',size=16,style='italic',color='green')
+        ax1b.scatter(utc,np.rad2deg(horiz_coord.alt),marker='.',color='green')
+ax1.autoscale(True,axis='x',tight=True)
+
 ax2 = plt.subplot(2, 1, 2)
 ax2.spines["top"].set_visible(False)  
 ax2.spines["right"].set_visible(False)  
-grad_beg, grad_end = ( 1.0, 0.0, 0.0), (0.0, 1.0, 0.0)
-col_list = [ color_gradient( val,
-                             grad_beg,
-                             grad_end,
-                             0,
-                             100) for val in binned.percentage_completed]
+col_list = [ color_gradient(val) for val in binned.percentage_completed]
 plt.bar(binned.index, height=binned.percentage_completed, width=1/24., color = col_list)
 locs, labels = plt.xticks()
 plt.setp(labels, rotation=45)
@@ -95,4 +126,4 @@ ax2.xaxis.set_major_formatter(xfmt)
 plt.yticks(size=14)
 plt.ylim(0, 100)
 plt.ylabel("Classification\ncompleteness (%)",size=16,style='italic')
-plt.savefig("output/plots/Perseids2016-%s.png" % DATE, figsize=(16,9), dpi=300)
+plt.savefig("output/plots/Quadrantids2016-%s.png" % DATE, figsize=(16,9), dpi=300)
