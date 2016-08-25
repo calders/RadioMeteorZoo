@@ -95,7 +95,7 @@ for spectrogram in spectrograms:
         im = Image.open(PNG_DIRECTORY+spectrogram)
         fig,ax = plt.subplots(1)
         ax.imshow(im,zorder=0)
-        for [ystart, xstart, ystop, xstop] in border_thresholds:
+        for [xstart, ystart, xstop, ystop] in border_thresholds:
             ax.add_patch(patches.Rectangle((xstart, ystart), xstop - xstart, ystop - ystart, edgecolor="red", fill=False))
         plt.title(spectrogram+" ("+str(nbr_volunteers)+" volunteers)")
         plt.savefig(OUTPUT_DIRECTORY+spectrogram)                        
