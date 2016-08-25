@@ -42,6 +42,42 @@ from scipy.ndimage import measurements
 from pylab import argwhere
 import random
 
+optimal_nbr_of_counters = {1: 1, #k: optimal_nbr_of_counters
+                           2: 2,
+                           3: 2,
+                           4: 2,
+                           5: 3,
+                           6: 3,
+                           7: 3,
+                           8: 3,
+                           9: 4,
+                           10: 4,
+                           11: 4,
+                           12: 5,
+                           13: 5,
+                           14: 5,
+                           15: 5,
+                           16: 6,
+                           17: 6,
+                           18: 6,
+                           19: 6,
+                           20: 7,
+                           21: 7,
+                           22: 7,
+                           23: 8,
+                           24: 8,
+                           25: 8,
+                           26: 8,
+                           27: 9,
+                           28: 9,
+                           29: 9,
+                           30:10,
+                           31:10,
+                           32:10,
+                           33:11,
+                           34:11,
+                           35:12}
+
 def read_detection_file(file_csv):
     """Read the CSV files from the manual detection
     A matrix with the same size as the image is created;
@@ -136,7 +172,7 @@ def detect_border(detection, minimum_width=None):
     border = []
     for nbr in range(1, num+1):
         B = argwhere(lw == nbr) #take one of the labeled regions
-        (xstart, ystart), (xstop, ystop) = B.min(0), B.max(0) #find min & max (x,y) value of this region
+        (ystart, xstart), (ystop, xstop) = B.min(0), B.max(0) #find min & max (x,y) value of this region
         if minimum_width == None or xstop-xstart >= minimum_width:
             border.append([xstart, ystart, xstop, ystop])
     return border
