@@ -50,30 +50,18 @@ import matplotlib.pyplot as plt
 matplotlib.use('Agg')
 
 DATE = classification_date #20160714
+station = "BEUCCL"
+title = "Radio Meteor Zoo\n (Quadrantids 2016, Uccle receiving station)"
 show_radiant_altitude = True
 lat = np.deg2rad(50.85)  # latitude of the receiving station [°]
 lon = np.deg2rad(4.35)   # longitude of the receiving station [°]
-rad_pos = {datetime(2016, 8, 10): [45,57], # radiant position (RA,Dec) for a given date
-           datetime(2016, 8, 15): [51,58]}
+#rad_pos = {datetime(2016, 8, 10): [45,57], # radiant position (RA,Dec) for a given date
+#           datetime(2016, 8, 15): [51,58]}
+rad_pos = {datetime(2015, 12, 31): [228,50], # radiant position (RA,Dec) for a given date
+           datetime(2016, 1, 5): [231,49],
+           datetime(2016, 1, 10): [234,48]}
 
-def color_gradient ( val, beg_rgb=(1.0, 0.0, 0.0), end_rgb=(0.0, 1.0, 0.0), val_min = 0, val_max = 100):
-    val_scale = (1.0 * val - val_min) / (val_max - val_min)
-    red = max([min([beg_rgb[0] + 0.5 * val_scale * (end_rgb[0] - beg_rgb[0]),1]),0])
-    green = max([min([beg_rgb[1] + val_scale * (end_rgb[1] - beg_rgb[1]),1]),0])
-    blue = max([min([beg_rgb[2] + val_scale * (end_rgb[2] - beg_rgb[2]),1]),0])
-    return ( red, green, blue )
-
-def perdelta(start, end, delta):
-    curr = start
-    while curr < end:
-        yield curr
-        curr += delta
-
-def toJD(dt):
-    JD = float(sidereal.JulianDate.fromDatetime(dt))
-    return JD
-
-(dt,identifications,volunteers) = pickle.load( open( "output/pickles/brams_zoo_meteor_identification-"+str(DATE)+".p", "rb" ) )
+(dt,identifications,volunteers) = pickle.load( open( "output/pickles/brams_zoo_meteor_identification-"+str(DATE)+"-"+station+".p", "rb" ) )
 
 df = pd.DataFrame({'counts': identifications, 'classifications': volunteers, 'spectrograms': 1}, index=dt)
 binned = df.resample('1H', how='sum')
@@ -85,7 +73,7 @@ fig.patch.set_facecolor('white')
 ax1 = plt.subplot(2, 1, 1)
 plt.plot(binned.index, binned.counts, marker='None', lw=2)
 plt.gcf().autofmt_xdate()
-plt.title("Radio Meteor Zoo\n (Perseids 2016, Humain receiving station)",size=18,weight='bold')
+plt.title(title,size=18,weight='bold')
 plt.ylabel('Meteor activity',size=16,style='italic',color='blue')
 plt.yticks(size=14)
 plt.ylim([0,1.2*max(binned.counts)])

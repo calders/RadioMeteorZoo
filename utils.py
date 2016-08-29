@@ -41,6 +41,7 @@ import numpy as np
 from scipy.ndimage import measurements
 from pylab import argwhere
 import random
+import sidereal #http://infohost.nmt.edu/tcc/help/lang/python/examples/sidereal/ims/sidereal.py
 
 optimal_nbr_of_counters = {1: 1, #k: optimal_nbr_of_counters
                            2: 2,
@@ -243,3 +244,29 @@ def mad(arr):
     arr = np.ma.array(arr).compressed() # should be faster to not use masked arrays.
     med = np.median(arr)
     return np.median(np.abs(arr - med))
+    
+def color_gradient ( val, beg_rgb=(1.0, 0.0, 0.0), end_rgb=(0.0, 1.0, 0.0), val_min = 0, val_max = 100):
+    """ function returns an RGB value based on the input value
+        0 = red / 50 = orange / 100 = green
+        It is used to color bars in a plot
+    """
+    val_scale = (1.0 * val - val_min) / (val_max - val_min)
+    red = max([min([beg_rgb[0] + 0.5 * val_scale * (end_rgb[0] - beg_rgb[0]),1]),0])
+    green = max([min([beg_rgb[1] + val_scale * (end_rgb[1] - beg_rgb[1]),1]),0])
+    blue = max([min([beg_rgb[2] + val_scale * (end_rgb[2] - beg_rgb[2]),1]),0])
+    return ( red, green, blue )
+
+def perdelta(start, end, delta):
+    """ Generator function that gives datetimes between start & end in steps of delta
+        source: http://stackoverflow.com/questions/10688006/generate-a-list-of-datetimes-between-an-interval
+    """
+    curr = start
+    while curr < end:
+        yield curr
+        curr += delta
+
+def toJD(dt):
+    """ Calculate the Julian Date based on a datetime
+    """
+    JD = float(sidereal.JulianDate.fromDatetime(dt))
+    return JD
