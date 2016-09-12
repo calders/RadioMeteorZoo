@@ -49,19 +49,20 @@ import matplotlib.pyplot as plt
 
 matplotlib.use('Agg')
 
-DATE = classification_date #20160714
-station = "BEUCCL"
-title = "Radio Meteor Zoo\n (Quadrantids 2016, Uccle receiving station)"
-show_radiant_altitude = True
+DATE = "20160906"
+STATION = "BEHUMA"
+title = "Radio Meteor Zoo\n (Sporadic background, Humain receiving station)"
+show_radiant_altitude = False
 lat = np.deg2rad(50.85)  # latitude of the receiving station [°]
 lon = np.deg2rad(4.35)   # longitude of the receiving station [°]
-#rad_pos = {datetime(2016, 8, 10): [45,57], # radiant position (RA,Dec) for a given date
-#           datetime(2016, 8, 15): [51,58]}
-rad_pos = {datetime(2015, 12, 31): [228,50], # radiant position (RA,Dec) for a given date
-           datetime(2016, 1, 5): [231,49],
-           datetime(2016, 1, 10): [234,48]}
+rad_pos = {datetime(2016, 8, 10): [45,57], # radiant position (RA,Dec) for a given date
+           datetime(2016, 8, 15): [51,58]}
+#rad_pos = {datetime(2015, 12, 31): [228,50], # radiant position (RA,Dec) for a given date
+#           datetime(2016, 1, 5): [231,49],
+#           datetime(2016, 1, 10): [234,48]}
+OUTPUT_PLOT = "Sporadics20160817-%s-%s.png" % (DATE, STATION)
 
-(dt,identifications,volunteers) = pickle.load( open( "output/pickles/brams_zoo_meteor_identification-"+str(DATE)+"-"+station+".p", "rb" ) )
+(dt,identifications,volunteers) = pickle.load( open( "output/pickles/brams_zoo_meteor_identification-"+DATE+"-"+STATION+".p", "rb" ) )
 
 df = pd.DataFrame({'counts': identifications, 'classifications': volunteers, 'spectrograms': 1}, index=dt)
 binned = df.resample('1H', how='sum')
@@ -114,4 +115,4 @@ ax2.xaxis.set_major_formatter(xfmt)
 plt.yticks(size=14)
 plt.ylim(0, 100)
 plt.ylabel("Classification\ncompleteness (%)",size=16,style='italic')
-plt.savefig("output/plots/Quadrantids2016-%s.png" % DATE, figsize=(16,9), dpi=300)
+plt.savefig("output/plots/%s.png" % OUTPUT_PLOT, figsize=(16,9), dpi=300)

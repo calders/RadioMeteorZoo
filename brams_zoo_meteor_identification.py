@@ -46,21 +46,15 @@ PNG_DIRECTORY = "input/png/"
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/"
 MASKSIZE = (595, 864)
-DATE = str(classification_date) #20160714
+DATE = "20160906"
 minimum_width = 1
-start = datetime(2016, 1, 1)
-end = datetime(2016, 1, 8)
-station = "BEUCCL"
-
-def perdelta(start, end, delta):
-    curr = start
-    while curr < end:
-        yield curr
-        curr += delta
+start = datetime(2016, 8, 10)
+end = datetime(2016, 8, 11)
+station = "BEOVER"
 
 spectrograms = []
 for result in perdelta(start, end, timedelta(minutes=5)):
-     spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"-"+station+"_SYS001.png")
+     spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_"+station+"_SYS001.png")
 
 
 csv_files = glob.glob(CSV_DIRECTORY+"*.csv")
