@@ -42,19 +42,19 @@ import utils
 from datetime import date, datetime, timedelta
 import pickle
 
-PNG_DIRECTORY = "input/png/"
+#PNG_DIRECTORY = "input/png/"
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/"
 MASKSIZE = (595, 864)
-DATE = "20160906"
-minimum_width = 1
+DATE = "20161124"
+minimum_width = 30
 start = datetime(2016, 8, 10)
-end = datetime(2016, 8, 11)
-station = "BEOVER"
+end = datetime(2016, 8, 14)
+STATION = "BEOVER"
 
 spectrograms = []
 for result in perdelta(start, end, timedelta(minutes=5)):
-     spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_"+station+"_SYS001.png")
+     spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_"+STATION+"_SYS001.png")
 
 
 csv_files = glob.glob(CSV_DIRECTORY+"*.csv")
@@ -71,7 +71,7 @@ for spectrogram in spectrograms:
     threshold_image = calculate_threshold_image(detection_files)
     #Step 3: select regions that are above identification threshold
     nbr_volunteers = len(detection_files)
-    if nbr_volunteers > 0: # and nbr_volunteers <= 10:
+    if nbr_volunteers > 0:
         alpha = optimal_nbr_of_counters[len(detection_files)]
         binary_image = threshold_image[threshold_image.keys()[0]].copy() 
         binary_image[binary_image < alpha] = 0
@@ -84,4 +84,4 @@ for spectrogram in spectrograms:
     else:
         print "[warning] spectrogram %s has %d volunteers" % (spectrogram,nbr_volunteers)
 
-pickle.dump( (date_time,identifications,volunteers), open( "output/pickles/brams_zoo_meteor_identification-"+DATE+"-"+station+".p", "wb" ) ) 
+pickle.dump( (date_time,identifications,volunteers), open( "output/pickles/brams_zoo_meteor_identification-"+DATE+"-"+STATION+".p", "wb" ) ) 
