@@ -54,9 +54,8 @@ spectrograms = []
 for result in perdelta(start, end, timedelta(minutes=5)):
      spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_"+STATION+"_SYS001.png")
 
-
+aggregated_identifications = {}
 csv_files = glob.glob(CSV_DIRECTORY+"*.csv")
-date_time, identifications, volunteers = [], [], []
 for spectrogram in spectrograms:
     dt = datetime.strptime(spectrogram[11:24], "%Y%m%d_%H%M")
     #Step 1: read detection file
