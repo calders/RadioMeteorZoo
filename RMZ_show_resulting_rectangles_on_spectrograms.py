@@ -49,29 +49,15 @@ PNG_DIRECTORY = "input/png/"
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/"
 MASKSIZE = (595, 864)
-
-def perdelta(start, end, delta):
-    curr = start
-    while curr < end:
-        yield curr
-        curr += delta
+start = datetime(2016, 8, 12)
+end = datetime(2016, 8, 13)
+station = "BEHUMA"
 
 spectrograms = []
-for result in perdelta(datetime(2016, 8, 10), datetime(2016, 8, 14), timedelta(minutes=5)):
-     spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_BEHUMA_SYS001.png")
-
+for result in perdelta(start, end, timedelta(minutes=5)):
+     spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_"+station+"_SYS001.png")
 
 csv_files = glob.glob(CSV_DIRECTORY+"*.csv")
-optimal_nbr_of_counters = {1: 1, #k: optimal_nbr_of_counters
-                           2: 2,
-                           3: 2,
-                           4: 2,
-                           5: 3,
-                           6: 3,
-                           7: 3,
-                           8: 3,
-                           9: 4,
-                           10: 4}
 date_time, identifications, volunteers = [], [], []
 for spectrogram in spectrograms:
     dt = datetime.strptime(spectrogram[11:24], "%Y%m%d_%H%M")
@@ -85,7 +71,7 @@ for spectrogram in spectrograms:
     threshold_image = calculate_threshold_image(detection_files)
     #Step 3: select regions that are above identification threshold
     nbr_volunteers = len(detection_files)
-    if nbr_volunteers > 0 and nbr_volunteers <= 10:
+    if nbr_volunteers > 0: # and nbr_volunteers <= 10:
         alpha = optimal_nbr_of_counters[len(detection_files)]
         binary_image = threshold_image[threshold_image.keys()[0]].copy() 
         binary_image[binary_image < alpha] = 0
