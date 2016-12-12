@@ -79,6 +79,8 @@ optimal_nbr_of_counters = {1: 1, #k: optimal_nbr_of_counters
                            34:11,
                            35:12}
 
+MASKSIZE = (595, 864)
+
 def read_detection_file(file_csv):
     """Read the CSV files from the manual detection
     A matrix with the same size as the image is created;

@@ -43,37 +43,41 @@ from datetime import datetime, timedelta
 
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/aggregated"
-MASKSIZE = (595, 864)
 DATE = "20161207"
 minimum_width = 1
-start = datetime(2016, 8, 10)
+start = datetime(2016, 7, 22)
 end = datetime(2016, 8, 20) #end day+1!!
-STATION = "BEHUMA"
+STATION = "BEUCCL"
+SHOWER = "Perseids"
 
 spectrograms = []
-for result in perdelta(start, end, timedelta(minutes=5)):
+for result in utils.perdelta(start, end, timedelta(minutes=5)):
      spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_"+STATION+"_SYS001.png")
 
 aggregated_identifications = {}
 csv_files = glob.glob(CSV_DIRECTORY+"*.csv")
 for spectrogram in spectrograms:
     dt = datetime.strptime(spectrogram[11:24], "%Y%m%d_%H%M")
+    print dt
     #Step 1: read detection file
     detection_files = {}
     for csv_file in csv_files:
-        tmp = read_detection_file_per_spectrogram(csv_file,spectrogram)
+        tmp = utils.read_detection_file_per_spectrogram(csv_file,spectrogram)
         if tmp is not None:        
             detection_files[csv_file] = tmp
     #Step 2: run meteor identification algorithm
-    threshold_image = calculate_threshold_image(detection_files)
+    threshold_image = utils.calculate_threshold_image(detection_files)
     #Step 3: select regions that are above identification threshold
     nbr_volunteers = len(detection_files)
     if nbr_volunteers > 0:
-        alpha = optimal_nbr_of_counters[len(detection_files)]
+        if nbr_volunteers <= 35:
+            alpha = utils.optimal_nbr_of_counters[len(detection_files)]
+        else:
+            alpha = 12 #we don't know better...
         binary_image = threshold_image[threshold_image.keys()[0]].copy() 
         binary_image[binary_image < alpha] = 0
         binary_image[binary_image >= alpha] = 1
-        border_threshold = detect_border(binary_image,minimum_width=minimum_width)
+        border_threshold = utils.detect_border(binary_image,minimum_width=minimum_width)
         meteors = []
         for element in border_threshold:
             dict = {'filename': spectrogram,
@@ -96,7 +100,7 @@ for spectrogram in spectrograms:
         aggregated_identifications[spectrogram] = meteors
 
 ### Output aggregated BRAMS detection file ###
-output_filename = "output/aggregated/20160101_0000_BEUCCL_aggregated-%s.csv" % DATE
+output_filename = "output/aggregated/%s_%s_aggregated-%s.csv" % (SHOWER, STATION, DATE)
 with open(output_filename, 'wb') as csvfile:
     fieldnames = ['filename','file_start','start (s)','end (s)','frequency_min (Hz)','frequency_max (Hz)',
                       'type',' top (px)',' left (px)',' bottom (px)',' right (px)','sample_rate (Hz)','fft',

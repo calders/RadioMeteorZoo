@@ -45,7 +45,7 @@ import sidereal #http://infohost.nmt.edu/tcc/help/lang/python/examples/sidereal/
 import numpy as np
 from scipy import interpolate
 from datetime import datetime, timedelta
-import matplotlib.pyplot as plt
+import utils
 
 matplotlib.use('Agg')
 
@@ -88,12 +88,12 @@ ax1.spines["right"].set_visible(False)
 
 # Plot radiant altitude
 if show_radiant_altitude:
-    JDs = map(toJD,rad_pos.keys())
+    JDs = map(utils.toJD,rad_pos.keys())
     pos = np.deg2rad(rad_pos.values()).tolist()
     retrieve = interpolate.interp1d(JDs, pos, axis=0)
     ax1b = ax1.twinx()
-    for utc in perdelta(min(dt), max(dt), timedelta(minutes=60)):
-        RA, Dec = retrieve(toJD(utc))
+    for utc in utils.perdelta(min(dt), max(dt), timedelta(minutes=60)):
+        RA, Dec = retrieve(utils.toJD(utc))
         equ_coord = sidereal.RADec(RA,Dec)
         h = equ_coord.hourAngle(utc,lon)
         horiz_coord = equ_coord.altAz(h,lat)
@@ -104,7 +104,7 @@ ax1.autoscale(True,axis='x',tight=True)
 ax2 = plt.subplot(2, 1, 2)
 ax2.spines["top"].set_visible(False)  
 ax2.spines["right"].set_visible(False)  
-col_list = [ color_gradient(val) for val in binned.percentage_completed]
+col_list = [ utils.color_gradient(val) for val in binned.percentage_completed]
 plt.bar(binned.index, height=binned.percentage_completed, width=1/24., color = col_list)
 locs, labels = plt.xticks()
 plt.setp(labels, rotation=45)
