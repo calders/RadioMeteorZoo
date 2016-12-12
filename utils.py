@@ -5,7 +5,7 @@ Created on Jun 22 2016
 
 @author: stijnc
 
-Copyright (C) 2016 Stijn Calders
+Copyright (C) 2016 Stijn Calders 
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -78,6 +78,8 @@ optimal_nbr_of_counters = {1: 1, #k: optimal_nbr_of_counters
                            33:11,
                            34:11,
                            35:12}
+
+MASKSIZE = (595, 864)
 
 def read_detection_file(file_csv):
     """Read the CSV files from the manual detection
