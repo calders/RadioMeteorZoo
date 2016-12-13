@@ -5,7 +5,7 @@ Created on Jun 22 2016
 
 @author: stijnc
 
-Copyright (C) 2016 Stijn Calders
+Copyright (C) 2016 Stijn Calders 
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,6 +41,45 @@ import numpy as np
 from scipy.ndimage import measurements
 from pylab import argwhere
 import random
+import sidereal #http://infohost.nmt.edu/tcc/help/lang/python/examples/sidereal/ims/sidereal.py
+
+optimal_nbr_of_counters = {1: 1, #k: optimal_nbr_of_counters
+                           2: 2,
+                           3: 2,
+                           4: 2,
+                           5: 3,
+                           6: 3,
+                           7: 3,
+                           8: 3,
+                           9: 4,
+                           10: 4,
+                           11: 4,
+                           12: 5,
+                           13: 5,
+                           14: 5,
+                           15: 5,
+                           16: 6,
+                           17: 6,
+                           18: 6,
+                           19: 6,
+                           20: 7,
+                           21: 7,
+                           22: 7,
+                           23: 8,
+                           24: 8,
+                           25: 8,
+                           26: 8,
+                           27: 9,
+                           28: 9,
+                           29: 9,
+                           30:10,
+                           31:10,
+                           32:10,
+                           33:11,
+                           34:11,
+                           35:12}
+
+MASKSIZE = (595, 864)
 
 def read_detection_file(file_csv):
     """Read the CSV files from the manual detection
@@ -136,7 +175,7 @@ def detect_border(detection, minimum_width=None):
     border = []
     for nbr in range(1, num+1):
         B = argwhere(lw == nbr) #take one of the labeled regions
-        (xstart, ystart), (xstop, ystop) = B.min(0), B.max(0) #find min & max (x,y) value of this region
+        (ystart, xstart), (ystop, xstop) = B.min(0), B.max(0) #find min & max (x,y) value of this region
         if minimum_width == None or xstop-xstart >= minimum_width:
             border.append([xstart, ystart, xstop, ystop])
     return border
@@ -207,3 +246,29 @@ def mad(arr):
     arr = np.ma.array(arr).compressed() # should be faster to not use masked arrays.
     med = np.median(arr)
     return np.median(np.abs(arr - med))
+    
+def color_gradient ( val, beg_rgb=(1.0, 0.0, 0.0), end_rgb=(0.0, 1.0, 0.0), val_min = 0, val_max = 100):
+    """ function returns an RGB value based on the input value
+        0 = red / 50 = orange / 100 = green
+        It is used to color bars in a plot
+    """
+    val_scale = (1.0 * val - val_min) / (val_max - val_min)
+    red = max([min([beg_rgb[0] + 0.5 * val_scale * (end_rgb[0] - beg_rgb[0]),1]),0])
+    green = max([min([beg_rgb[1] + val_scale * (end_rgb[1] - beg_rgb[1]),1]),0])
+    blue = max([min([beg_rgb[2] + val_scale * (end_rgb[2] - beg_rgb[2]),1]),0])
+    return ( red, green, blue )
+
+def perdelta(start, end, delta):
+    """ Generator function that gives datetimes between start & end in steps of delta
+        source: http://stackoverflow.com/questions/10688006/generate-a-list-of-datetimes-between-an-interval
+    """
+    curr = start
+    while curr < end:
+        yield curr
+        curr += delta
+
+def toJD(dt):
+    """ Calculate the Julian Date based on a datetime
+    """
+    JD = float(sidereal.JulianDate.fromDatetime(dt))
+    return JD

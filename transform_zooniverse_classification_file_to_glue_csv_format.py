@@ -40,8 +40,11 @@ import json
 import csv
 from astropy.table import Table
 from astropy.time import Time
+from datetime import datetime
 
-zooniverse_classification_file = "input/radio-meteor-zoo-classifications.csv"
+DATE = str(classification_date)
+
+zooniverse_classification_file = "input/radio-meteor-zoo-classifications-"+DATE+".csv"
 output = []
 with open(zooniverse_classification_file) as csvfile:
      classifications = csv.DictReader(csvfile)
@@ -50,22 +53,27 @@ with open(zooniverse_classification_file) as csvfile:
              username = row['user_name']
              created_at = datetime.strptime(row['created_at'], "%Y-%m-%d %H:%M:%S UTC")
              subject = json.loads(row['subject_data'])
-             filename = subject[subject.keys()[0]]['Filename']
+             if 'Filename' in subject[subject.keys()[0]]:  #RAD_BEDOUR_20160812_0300_BEHUMA_SYS001.png
+                 filename = subject[subject.keys()[0]]['Filename']
+             else:
+                 filename = subject[subject.keys()[0]]['filename']
              annotations = json.loads(row['annotations'])
              metadata = json.loads(row['metadata'])
              if 'seen_before' in metadata.keys() and metadata['seen_before'] == True:
                  continue
              nbr_rectangles = len(annotations[0]['value'])
              dt = datetime.strptime(filename[11:24], "%Y%m%d_%H%M")
+             station = filename[25:30]
              dict = {'username': username,
                      'created at': Time(created_at).decimalyear,
                      'filename': filename,
+                     'station': station,
                      'datetime': Time(dt).decimalyear,
                      'nbr rectangles': nbr_rectangles}
              output.append(dict)
 
 
-output_filename = "input/glue.csv"
+output_filename = "input/glue-"+DATE+".csv"
 #with open(output_filename, 'wb') as csvfile:
 #    fieldnames = ['username','filename','datetime','top (px)','left (px)','bottom (px)','right (px)']
 #    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)    

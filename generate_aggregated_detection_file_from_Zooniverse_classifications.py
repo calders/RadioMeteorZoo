@@ -36,108 +36,71 @@ web    : www.aeronomie.be
 ________________________________________________
 """
 
-import json
 import csv
+import utils
+import glob
+from datetime import datetime, timedelta
 
-
-PNG_DIRECTORY = "input/png/"
 CSV_DIRECTORY = "input/csv/"
-OUTPUT_DIRECTORY = "output/aggregated/"
-MASKSIZE = (595, 864)
-DATE = date #20160714
+OUTPUT_DIRECTORY = "output/aggregated"
+DATE = "20161207"
+minimum_width = 1
+start = datetime(2016, 7, 22)
+end = datetime(2016, 8, 20) #end day+1!!
+STATION = "BEUCCL"
+SHOWER = "Perseids"
 
-### Read Zooniverse classification file ###
-
-zooniverse_classification_file = "input/radio-meteor-zoo-classifications-%s.csv" % DATE
-retired_subjects = set()
-
-#Compile a list of retired subjects
-with open(zooniverse_classification_file) as csvfile:
-     classifications = csv.DictReader(csvfile)
-     for row in classifications:
-         if row['workflow_version'] == "17.47":
-             subject = json.loads(row['subject_data'])
-             if subject[subject.keys()[0]]['retired'] != None:
-                 retired_subjects.add(subject[subject.keys()[0]]['Filename'])                 
-retired_subjects.remove("RAD_BEDOUR_20160105_2020_BEUCCL_SYS001.png") # something very strange happened with this subject!
-                                                                      # it was retired, but then shown again
-                 
-#Collect identifications from this list of retired subjects
-with open(zooniverse_classification_file) as csvfile:
-     classifications = csv.DictReader(csvfile)
-     identifications = {} #e.g. identifications['A_M_P'][0]['RAD_BEDOUR_...'][' bottom (px)']
-     for row in classifications:
-         if row['workflow_version'] == "17.47":
-             subject = json.loads(row['subject_data'])
-             filename = subject[subject.keys()[0]]['Filename']
-             if filename in retired_subjects: # consider only retired subjects!
-                 username = row['user_name']
-                 annotations = json.loads(row['annotations'])
-                 metadata = json.loads(row['metadata'])
-                 if 'seen_before' in metadata.keys() and metadata['seen_before'] == True:
-                     continue
-                 meteors = []
-                 for rectangle in annotations[0]['value']:
-                     x = rectangle['x']
-                     y = rectangle['y']
-                     width = rectangle['width']
-                     height = rectangle['height']
-                     if x == None or y == None or width == None or height == None: #strange that this happens!!!
-                         continue
-                     meteors.append({
-                               ' top (px)': int(y+height),
-                               ' left (px)': int(x),
-                               ' bottom (px)': int(y),
-                               ' right (px)': int(x+width),
-                              })                         
-                 if not filename in identifications.keys():
-                     identifications[filename] = {username: meteors}
-                 elif not username in identifications[filename].keys():
-                     identifications[filename][username] = meteors
-                 else: #normally this case should never happen!!!
-                     print '[WARNING] User %s processed more than once spectrogram %s' % (username, filename) 
-                     #identifications[filename][username].append(meteors)
-
-### Generate aggregated BRAMS detection file ###
+spectrograms = []
+for result in utils.perdelta(start, end, timedelta(minutes=5)):
+     spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_"+STATION+"_SYS001.png")
 
 aggregated_identifications = {}
-for spectrogram, content in identifications.iteritems():
+csv_files = glob.glob(CSV_DIRECTORY+"*.csv")
+for spectrogram in spectrograms:
+    dt = datetime.strptime(spectrogram[11:24], "%Y%m%d_%H%M")
+    print dt
+    #Step 1: read detection file
     detection_files = {}
-    for user, meteors in content.iteritems():
-        tmp = read_detection_file_from_memory(meteors)
+    for csv_file in csv_files:
+        tmp = utils.read_detection_file_per_spectrogram(csv_file,spectrogram)
         if tmp is not None:        
-            detection_files[user] = tmp
-    threshold_image = calculate_threshold_image(detection_files)
-    if len(threshold_image) == 0: #no meteors detected in this spectrogram
-        continue
-    alpha = 4
-    binary_image = threshold_image[threshold_image.keys()[0]].copy() 
-    binary_image[binary_image < alpha] = 0
-    binary_image[binary_image >= alpha] = 1
-    border_threshold = detect_border(binary_image)
-    meteors = []
-    for element in border_threshold:
-        dict = {'filename': spectrogram,
-               'file_start': 'unk',
-               'start (s)': 'unk',
-               'end (s)': 'unk',
-               'frequency_min (Hz)': 'unk',
-               'frequency_max (Hz)': 'unk',
-               'type': 'unk',
-               ' top (px)': element[2],
-               ' left (px)': element[1],
-               ' bottom (px)': element[0],
-               ' right (px)': element[3],
-               'sample_rate (Hz)': 'unk',
-               'fft': 'unk',
-               'overlap': 'unk',
-               'color_min': 'unk',
-               'color_max': 'unk'}
-        meteors.append(dict)
-    aggregated_identifications[spectrogram] = meteors
+            detection_files[csv_file] = tmp
+    #Step 2: run meteor identification algorithm
+    threshold_image = utils.calculate_threshold_image(detection_files)
+    #Step 3: select regions that are above identification threshold
+    nbr_volunteers = len(detection_files)
+    if nbr_volunteers > 0:
+        if nbr_volunteers <= 35:
+            alpha = utils.optimal_nbr_of_counters[len(detection_files)]
+        else:
+            alpha = 12 #we don't know better...
+        binary_image = threshold_image[threshold_image.keys()[0]].copy() 
+        binary_image[binary_image < alpha] = 0
+        binary_image[binary_image >= alpha] = 1
+        border_threshold = utils.detect_border(binary_image,minimum_width=minimum_width)
+        meteors = []
+        for element in border_threshold:
+            dict = {'filename': spectrogram,
+                   'file_start': 'unk',
+                   'start (s)': 'unk',
+                   'end (s)': 'unk',
+                   'frequency_min (Hz)': 'unk',
+                   'frequency_max (Hz)': 'unk',
+                   'type': 'unk',
+                   ' top (px)': element[2],
+                   ' left (px)': element[1],
+                   ' bottom (px)': element[0],
+                   ' right (px)': element[3],
+                   'sample_rate (Hz)': 'unk',
+                   'fft': 'unk',
+                   'overlap': 'unk',
+                   'color_min': 'unk',
+                   'color_max': 'unk'}
+            meteors.append(dict)
+        aggregated_identifications[spectrogram] = meteors
 
 ### Output aggregated BRAMS detection file ###
-output_filename = "output/aggregated/20160101_0000_BEUCCL_aggregated-%s.csv" % DATE
+output_filename = "output/aggregated/%s_%s_aggregated-%s.csv" % (SHOWER, STATION, DATE)
 with open(output_filename, 'wb') as csvfile:
     fieldnames = ['filename','file_start','start (s)','end (s)','frequency_min (Hz)','frequency_max (Hz)',
                       'type',' top (px)',' left (px)',' bottom (px)',' right (px)','sample_rate (Hz)','fft',
