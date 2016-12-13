@@ -55,7 +55,6 @@ if os.environ.has_key("ZOO_SUBJECTSET"):
   subject_set_display_name = os.environ["ZOO_SUBJECTSET"]
 if os.environ.has_key("BRAMS_STATION"):
   station = os.environ["BRAMS_STATION"]
-station = "BEHUMA_13"
 #if os.environ.has_key("DATE"):
 #  date = os.environ["DATE"]
 
