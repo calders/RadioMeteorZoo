@@ -37,11 +37,12 @@ ________________________________________________
 """
 
 from panoptes_client import SubjectSet, Subject, Project, Panoptes
-#from panoptes_client.panoptes import PanoptesAPIException
 import glob
 import os
 import time
 import sys
+
+BASEDIR = '/bira-iasb/data/incoming/brams/'
 
 print "[PYTHON] Create a subject set and upload new subjects to it"
 
@@ -55,22 +56,20 @@ if os.environ.has_key("ZOO_SUBJECTSET"):
   subject_set_display_name = os.environ["ZOO_SUBJECTSET"]
 if os.environ.has_key("BRAMS_STATION"):
   station = os.environ["BRAMS_STATION"]
-#if os.environ.has_key("DATE"):
-#  date = os.environ["DATE"]
 
 Panoptes.connect(username=username, password=password)
 
 project = Project.find(slug='zooniverse/radio-meteor-zoo')
 #Update subjects
 subjects = []
-files = glob.glob('/data/incoming/brams/ZOO/'+station+'/*.png')
+files = glob.glob(BASEDIR+'ZOO/'+station+'/*.png')
 if len(files) == 0:
-  raise Exception('Error finding PNG files. Did you specify correct station? (/data/incoming/brams/ZOO/'+station+'/*.png)')
-metadata = open('/data/incoming/brams/'+station+'.zoo','r')
+  raise Exception('Error finding PNG files. Did you specify correct station? ('+BASEDIR+'ZOO/'+station+'/*.png)')
+metadata = open(BASEDIR+station+'.zoo','r')
 (fft,overlap,color_min,color_max) = metadata.readlines()
 
 #Create uploaded directory if necessary
-dest = '/data/incoming/brams/ZOO/'+station+'/uploaded/'
+dest = BASEDIR+'ZOO/'+station+'/uploaded/'
 if not(os.path.isdir(dest)):
     os.mkdir(dest)
 
