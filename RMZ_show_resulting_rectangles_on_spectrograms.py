@@ -49,12 +49,12 @@ PNG_DIRECTORY = "input/png/"
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/"
 MASKSIZE = (595, 864)
-start = datetime(2016, 8, 12)
-end = datetime(2016, 8, 13)
+start = datetime(2016, 8, 19)
+end = datetime(2016, 8, 20)
 station = "BEHUMA"
 
 spectrograms = []
-for result in perdelta(start, end, timedelta(minutes=5)):
+for result in utils.perdelta(start, end, timedelta(minutes=5)):
      spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_"+station+"_SYS001.png")
 
 csv_files = glob.glob(CSV_DIRECTORY+"*.csv")
@@ -64,19 +64,19 @@ for spectrogram in spectrograms:
     #Step 1: read detection file
     detection_files = {}
     for csv_file in csv_files:
-        tmp = read_detection_file_per_spectrogram(csv_file,spectrogram)
+        tmp = utils.read_detection_file_per_spectrogram(csv_file,spectrogram)
         if tmp is not None:        
             detection_files[csv_file] = tmp
     #Step 2: run meteor identification algorithm
-    threshold_image = calculate_threshold_image(detection_files)
+    threshold_image = utils.calculate_threshold_image(detection_files)
     #Step 3: select regions that are above identification threshold
     nbr_volunteers = len(detection_files)
     if nbr_volunteers > 0: # and nbr_volunteers <= 10:
-        alpha = optimal_nbr_of_counters[len(detection_files)]
+        alpha = utils.optimal_nbr_of_counters[len(detection_files)]
         binary_image = threshold_image[threshold_image.keys()[0]].copy() 
         binary_image[binary_image < alpha] = 0
         binary_image[binary_image >= alpha] = 1
-        border_thresholds = detect_border(binary_image)
+        border_thresholds = utils.detect_border(binary_image)
         #Step 4: plot these regions on spectrograms
         im = Image.open(PNG_DIRECTORY+spectrogram)
         fig,ax = plt.subplots(1)
