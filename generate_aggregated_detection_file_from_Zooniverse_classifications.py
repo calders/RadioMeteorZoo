@@ -43,12 +43,12 @@ from datetime import datetime, timedelta
 
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/aggregated"
-DATE = "20161207"
+DATE = "20170313"
 minimum_width = 1
-start = datetime(2016, 7, 22)
-end = datetime(2016, 8, 20) #end day+1!!
-STATION = "BEUCCL"
-SHOWER = "Perseids"
+start = datetime(2016, 12, 10)
+end = datetime(2016, 12, 18) #end day+1!!
+STATION = "BEOTTI"
+SHOWER = "Geminids2016"
 
 spectrograms = []
 for result in utils.perdelta(start, end, timedelta(minutes=5)):

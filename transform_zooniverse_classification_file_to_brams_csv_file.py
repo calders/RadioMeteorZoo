@@ -42,8 +42,8 @@ import glob
 import os
 import re
 
-DATE = "20160906"
-pattern = re.compile("RAD_BEDOUR_2016081.*_BEOVER_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
+DATE = "20170419"
+pattern = re.compile("RAD_BEDOUR_20161217.*_BEOTTI_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
 
 #remove old files
 for file in glob.glob("input/csv/*.csv"):

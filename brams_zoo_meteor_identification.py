@@ -45,11 +45,11 @@ import pickle
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/"
 MASKSIZE = (595, 864)
-DATE = "20161124"
-minimum_width = 30
-start = datetime(2016, 8, 10)
-end = datetime(2016, 8, 14)
-STATION = "BEOVER"
+DATE = "20170116"
+minimum_width = 1
+start = datetime(2016, 12, 5)
+end = datetime(2016, 12, 17) #end day+1!
+STATION = "BEHUMA"
 
 spectrograms = []
 for result in utils.perdelta(start, end, timedelta(minutes=5)):

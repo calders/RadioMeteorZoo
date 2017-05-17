@@ -49,18 +49,21 @@ import utils
 
 matplotlib.use('Agg')
 
-DATE = "20161124"
-STATION = "BEOVER"
-title = "Radio Meteor Zoo\n (Perseids 2016, Overpelt receiving station)"
+DATE = "20170116"
+STATION = "BEHUMA"
+title = "Radio Meteor Zoo\n (Geminids 2016, Humain receiving station)"
 show_radiant_altitude = True
 lat = np.deg2rad(50.85)  # latitude of the receiving station [°]
 lon = np.deg2rad(4.35)   # longitude of the receiving station [°]
-rad_pos = {datetime(2016, 8, 10): [45,57], # radiant position (RA,Dec) for a given date
-           datetime(2016, 8, 15): [51,58]}
-#rad_pos = {datetime(2015, 12, 31): [228,50], # radiant position (RA,Dec) for a given date
+rad_pos = {datetime(2016, 12, 5): [103,33],# Geminids radiant position (RA,Dec) for a given date
+           datetime(2016, 12, 10): [108,33],
+           datetime(2016, 12, 15): [113,33]}
+#rad_pos = {datetime(2016, 8, 10): [45,57], # Perseids radiant position (RA,Dec) for a given date
+#           datetime(2016, 8, 15): [51,58]}
+#rad_pos = {datetime(2015, 12, 31): [228,50], # Quadrantids radiant position (RA,Dec) for a given date
 #           datetime(2016, 1, 5): [231,49],
 #           datetime(2016, 1, 10): [234,48]}
-OUTPUT_PLOT = "Perseids2016-%s-%s.png" % (DATE, STATION)
+OUTPUT_PLOT = "Geminids2016-%s-%s.png" % (DATE, STATION)
 
 (dt,identifications,volunteers) = pickle.load( open( "output/pickles/brams_zoo_meteor_identification-"+DATE+"-"+STATION+".p", "rb" ) )
 
@@ -75,7 +78,8 @@ ax1 = plt.subplot(2, 1, 1)
 plt.plot(binned.index, binned.counts, marker='None', lw=2)
 plt.gcf().autofmt_xdate()
 plt.title(title,size=18,weight='bold')
-plt.ylabel('Meteor activity\n(Min. duration: 10s)',size=16,style='italic',color='blue')
+#plt.ylabel('Meteor activity\n(Min. duration: 10s)',size=16,style='italic',color='blue')
+plt.ylabel('Meteor activity',size=16,style='italic',color='blue')
 plt.yticks(size=14)
 plt.ylim([0,1.2*max(binned.counts)])
 plt.xlim([binned.index.min(), binned.index.max()])
@@ -115,4 +119,4 @@ ax2.xaxis.set_major_formatter(xfmt)
 plt.yticks(size=14)
 plt.ylim(0, 100)
 plt.ylabel("Classification\ncompleteness (%)",size=16,style='italic')
-plt.savefig("output/plots/%s.png" % OUTPUT_PLOT, figsize=(16,9), dpi=300)
+plt.savefig("output/plots/%s" % OUTPUT_PLOT, figsize=(16,9), dpi=300)
