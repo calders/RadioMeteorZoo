@@ -10,6 +10,7 @@ Website: https://www.zooniverse.org/projects/zooniverse/radio-meteor-zoo
 /zooniverse/input/png The BRAMS spectrograms
 /zooniverse/input/reference The BRAMS reference files (if applicable)
 /zooniverse/output Contains the output files
+/zooniverse/output/annotated Annotated spectrograms
 /zooniverse/output/aggregated The aggregated BRAMS CSV files
 /zooniverse/output/comparison Comparison result files between Zooniverse volunteers and the 'reference'
 /zooniverse/output/glue GlueViz files

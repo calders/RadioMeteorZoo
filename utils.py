@@ -273,3 +273,61 @@ def toJD(dt):
     JD = float(sidereal.JulianDate.fromDatetime(dt))
     return JD
 
+def read_rectangle_coordinates(fp, dt):
+    """Read rectangle coordinates from CSV file
+       inputs:
+           - fp: CSV file
+           - dt: date & time to filter on
+       returns:
+           - list of coordinates [top, left, bottom, right]
+    """
+    import pandas as pd
+    output = []
+    df = pd.read_csv(fp)
+    df2 = df[df['filename'].str.contains(dt)]
+    spectrogram = df2['filename'].iloc[0]
+    output = df2[[' left (px)', ' bottom (px)', ' right (px)', ' top (px)']].values.tolist()
+    if len(output) == 0:
+       raise Exception('No meteors found')
+    else:
+       return (spectrogram, output)
+
+def plot_rectangles_on_spectrogram(spectrogram, 
+                                   rectangles,
+                                   output_filename="", 
+                                   title=""):
+    """Draw rectangles on spectrogram
+      inputs:
+          - spectrogram: name of the spectrogram file
+          - rectangles: list of [left, bottom, right, top]
+          - output_filename: output filename
+          - title: plot title
+    """
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as patches
+    from PIL import Image
+    import numpy as np
+    
+    plt.ioff() #no interactive plotting
+    
+    INPUT_DIR = "input/png/"
+    OUTPUT_DIR= "output/annotated/"
+    
+    im = np.array(Image.open(INPUT_DIR+spectrogram), dtype=np.uint8)
+    
+    # Create figure and axes
+    fig,ax = plt.subplots(1)
+    
+    # Display the image
+    ax.imshow(im)
+    
+    for [left, bottom, right, top] in rectangles:
+        # Create a Rectangle patch
+        rect = patches.Rectangle((left, bottom),(right-left),(top-bottom),linewidth=1,edgecolor='r',facecolor='none')
+        
+        # Add the patch to the Axes
+        ax.add_patch(rect)
+        
+    plt.title(title)
+    plt.savefig(OUTPUT_DIR+output_filename)
+    plt.close()
