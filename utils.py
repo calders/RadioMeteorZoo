@@ -175,7 +175,7 @@ def detect_border(detection, minimum_width=None):
     border = []
     for nbr in range(1, num+1):
         B = argwhere(lw == nbr) #take one of the labeled regions
-        (ystart, xstart), (ystop, xstop) = B.min(0), B.max(0) #find min & max (x,y) value of this region
+        (xstart, ystart), (xstop, ystop) = B.min(0), B.max(0) #find min & max (x,y) value of this region
         if minimum_width == None or xstop-xstart >= minimum_width:
             border.append([xstart, ystart, xstop, ystop])
     return border
@@ -272,3 +272,4 @@ def toJD(dt):
     """
     JD = float(sidereal.JulianDate.fromDatetime(dt))
     return JD
+
