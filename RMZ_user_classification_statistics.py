@@ -38,11 +38,8 @@ ________________________________________________
 
 import json
 import csv
-import glob
-import os
-import re
 
-DATE = str(classification_date) #20160714
+DATE = "20170821"
 
 zooniverse_classification_file = "input/radio-meteor-zoo-classifications-%s.csv" % DATE
 output = {}
@@ -55,22 +52,21 @@ with open(zooniverse_classification_file) as csvfile:
              if 'Filename' in subject[subject.keys()[0]]:
                  filename = subject[subject.keys()[0]]['Filename']
              else:
-                 filename = subject[subject.keys()[0]]['filename']                     
-#             pattern = re.compile("RAD_BEDOUR_2016081.*_BEHUMA_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
-#             if not pattern.match(filename):
-#                 continue
+                 filename = subject[subject.keys()[0]]['filename']
+             created_at = row['created_at']                     
              metadata = json.loads(row['metadata'])
              if 'seen_before' in metadata.keys() and metadata['seen_before'] == True:
                  continue
              if not username in output.keys():
-                 output[username] = [filename]
+                 output[username] = [1, created_at, created_at] #(nbr_files, first, last)
              else:
-                 output[username].append(filename)
+                 output[username][0] = output[username][0]+1
+                 output[username][2] = created_at
 
 output_filename = "input/radio-meteor-zoo-classifications-%s-statistics.csv" % DATE
 with open(output_filename, 'wb') as csvfile:                 
-    fieldnames = ['username','nbr_of_files']
+    fieldnames = ['username','nbr_of_files','first','last']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)    
     writer.writeheader()
     for username, data in output.iteritems():
-        writer.writerow({'username': username, 'nbr_of_files': len(data)})
+        writer.writerow({'username': username, 'nbr_of_files': data[0], 'first': data[1], 'last': data[2]})
