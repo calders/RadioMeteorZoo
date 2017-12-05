@@ -2,11 +2,11 @@
 """
 Generate aggregated BRAMS detection file based on Zooniverse classifications
 Outliers are removed in a second iteration
-Created on Thu Jul 14 16:44:50 2016
+Created on 8 August 2017
 
 @author: stijnc
 
-Copyright (C) 2016 Stijn Calders
+Copyright (C) 2017 Stijn Calders
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -51,47 +51,8 @@ START = datetime(2016, 12, 10)
 END = datetime(2016, 12, 11) #end day+1!!
 STATION = "BEOTTI"
 SHOWER = "Geminids2016"
-OUTLIER_THRESHOLD = 0.10
-COMPLEX_THRESHOLD = 0.20
-
-def aggregate_rectangles(detection_files, minimum_width=MINIMUM_WIDTH):
-    """run meteor identification algorithm &
-       select regions that are above identification threshold"""
-    #Step 2: run meteor identification algorithm
-    threshold_image = utils.calculate_threshold_image(detection_files)
-    #Step 3: select regions that are above identification threshold
-    nbr_volunteers = len(detection_files)
-    if nbr_volunteers > 0:
-        if nbr_volunteers <= 35:
-            alpha = utils.optimal_nbr_of_counters[len(detection_files)]
-        else:
-            alpha = 12 #we don't know better...
-        binary_image = threshold_image[threshold_image.keys()[0]].copy() 
-        binary_image[binary_image < alpha] = 0
-        binary_image[binary_image >= alpha] = 1
-        border_threshold = utils.detect_border(binary_image,minimum_width=minimum_width)
-        meteors = []
-        for element in border_threshold:
-            dict = {'filename': spectrogram,
-                   'file_start': 'unk',
-                   'start (s)': 'unk',
-                   'end (s)': 'unk',
-                   'frequency_min (Hz)': 'unk',
-                   'frequency_max (Hz)': 'unk',
-                   'type': 'unk',
-                   ' top (px)': element[2],
-                   ' left (px)': element[1],
-                   ' bottom (px)': element[0],
-                   ' right (px)': element[3],
-                   'sample_rate (Hz)': 'unk',
-                   'fft': 'unk',
-                   'overlap': 'unk',
-                   'color_min': 'unk',
-                   'color_max': 'unk'}
-            meteors.append(dict)
-        return (meteors, binary_image)
-    else:
-        return None
+OUTLIER_THRESHOLD = 0.10 #less than 10% overlap
+COMPLEX_THRESHOLD = 0.20 #more than 20% of the volunteers are outliers
 
 def write_output(aggregated_identifications, shower=SHOWER, station=STATION, date=DATE, run=1):
     """Output aggregated BRAMS detection file"""
@@ -125,7 +86,7 @@ for spectrogram in spectrograms:
             detection_files[csv_file] = tmp
     #run meteor identification algorithm & select regions that are above identification threshold
     nbr_volunteers = len(detection_files)
-    meteors, binary_image = aggregate_rectangles(detection_files)
+    meteors, binary_image = utils.aggregate_rectangles(detection_files, spectrogram=spectrogram)
     aggregated_identifications["1st_run"][spectrogram] = meteors
     #compare volunteers with the aggregated result
     to_be_removed = []
@@ -140,10 +101,10 @@ for spectrogram in spectrograms:
     if float(len(to_be_removed)) > COMPLEX_THRESHOLD * float(nbr_volunteers):
         print "Spectrogram %s is complex (%d out of %d removed)" % (spectrogram, len(to_be_removed), nbr_volunteers)
     else:
-        #run meteoridentification algorithm again (without outliers)
+        #run meteor identification algorithm again (without outliers)
         for volunteer in to_be_removed:
             del detection_files[volunteer]
-            meteors, _ = aggregate_rectangles(detection_files)
+            meteors, _ = utils.aggregate_rectangles(detection_files, spectrogram=spectrogram)
             aggregated_identifications["2nd_run"][spectrogram] = meteors
 write_output(aggregated_identifications["1st_run"],run=1)
 write_output(aggregated_identifications["2nd_run"],run=2)
