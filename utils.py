@@ -117,13 +117,13 @@ def read_detection_file_from_memory(meteors):
     if not np.all(mask[spectrogram]==0):
         return mask
 
-def read_detection_file_per_spectrogram(file_csv,spectrogram):
+def read_detection_file_per_spectrogram(file_csv, spectrogram, swap_topbottom=False):
     """Read the CSV files from the manual detection
     A matrix with the same size as the image is created;
     the elements corresponding with a meteor are set to 1
     This function reads only information about 1 specific spectrogram
     """
-    mask = {spectrogram:np.zeros(MASKSIZE, dtype=int)}
+    mask = {spectrogram: np.zeros(MASKSIZE, dtype=int)}
     with open(file_csv, 'rb') as csvfile:
         reader = csv.DictReader(csvfile)
         for line in reader:
@@ -133,7 +133,10 @@ def read_detection_file_per_spectrogram(file_csv,spectrogram):
             bottom = int(float(line[' bottom (px)']))
             left = int(float(line[' left (px)']))
             top = int(float(line[' top (px)']))
-            mask[spectrogram][bottom:top, left:right] = 1
+            if not swap_topbottom:
+                mask[spectrogram][bottom:top, left:right] = 1
+            else:
+                mask[spectrogram][595-top:595-bottom+1, left:right+1] = 1
     if not np.all(mask[spectrogram]==0):
         return mask
 
@@ -147,7 +150,7 @@ def calculate_threshold_image(masks, counters=None):
             try:            
                 for when, matrix in mask.iteritems():
                     if when in total_mask:
-                        total_mask[when] += matrix.copy()
+                        total_mask[when] = total_mask[when] + matrix.copy()
                     else:
                         total_mask[when] = matrix.copy()
             except AttributeError:
@@ -331,3 +334,44 @@ def plot_rectangles_on_spectrogram(spectrogram,
     plt.title(title)
     plt.savefig(OUTPUT_DIR+output_filename)
     plt.close()
+    
+def aggregate_rectangles(detection_files, minimum_width=0, corr_factor=0, spectrogram=""):
+    """run meteor identification algorithm &
+       select regions that are above identification threshold
+    """
+    # run meteor identification algorithm
+    threshold_image = calculate_threshold_image(detection_files)
+    # select regions that are above identification threshold
+    nbr_volunteers = len(detection_files)
+    if nbr_volunteers > 0:
+        if nbr_volunteers <= 35:
+            alpha = optimal_nbr_of_counters[len(detection_files)]
+        else:
+            alpha = 12 #we don't know better...
+        alpha = alpha - corr_factor
+        binary_image = threshold_image[threshold_image.keys()[0]].copy() 
+        binary_image[binary_image < alpha] = 0
+        binary_image[binary_image >= alpha] = 1
+        border_threshold = detect_border(binary_image,minimum_width=minimum_width)
+        meteors = []
+        for element in border_threshold:
+            dict = {'filename': spectrogram,
+                   'file_start': 'unk',
+                   'start (s)': 'unk',
+                   'end (s)': 'unk',
+                   'frequency_min (Hz)': 'unk',
+                   'frequency_max (Hz)': 'unk',
+                   'type': 'unk',
+                   ' top (px)': element[2],
+                   ' left (px)': element[1],
+                   ' bottom (px)': element[0],
+                   ' right (px)': element[3],
+                   'sample_rate (Hz)': 'unk',
+                   'fft': 'unk',
+                   'overlap': 'unk',
+                   'color_min': 'unk',
+                   'color_max': 'unk'}
+            meteors.append(dict)
+        return (meteors, binary_image)
+    else:
+        return None
