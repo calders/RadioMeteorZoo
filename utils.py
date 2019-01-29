@@ -86,10 +86,10 @@ def read_detection_file(file_csv):
     A matrix with the same size as the image is created;
     the elements corresponding with a meteor are set to 1
     """
-    filename = REFERENCE_DETECTION_FILE
-    mask = {filename:np.zeros(MASKSIZE, dtype=int)}
+    mask = {"spectrogram":np.zeros(MASKSIZE, dtype=int)}
     with open(file_csv, 'rb') as csvfile:
         reader = csv.DictReader(csvfile)
+        filename = reader[0]['filename']
         for line in reader:
             if line['filename'] != filename:
                 filename = line['filename']
@@ -107,14 +107,14 @@ def read_detection_file_from_memory(meteors):
     the elements corresponding with a meteor are set to 1
     This function reads only information about 1 specific spectrogram
     """
-    mask = {spectrogram:np.zeros(MASKSIZE, dtype=int)}
+    mask = {"spectrogram":np.zeros(MASKSIZE, dtype=int)}
     for meteor in meteors:
         right = meteor[' right (px)']
         bottom = meteor[' bottom (px)']
         left = meteor[' left (px)']
         top = meteor[' top (px)']
-        mask[spectrogram][bottom:top, left:right] = 1
-    if not np.all(mask[spectrogram]==0):
+        mask["spectrogram"][bottom:top, left:right] = 1
+    if not np.all(mask["spectrogram"]==0):
         return mask
 
 def read_detection_file_per_spectrogram(file_csv, spectrogram, swap_topbottom=False):
@@ -124,7 +124,7 @@ def read_detection_file_per_spectrogram(file_csv, spectrogram, swap_topbottom=Fa
     This function reads only information about 1 specific spectrogram
     """
     mask = {spectrogram: np.zeros(MASKSIZE, dtype=int)}
-    with open(file_csv, 'rb') as csvfile:
+    with open(file_csv, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for line in reader:
             if line['filename'] != spectrogram:
@@ -145,10 +145,10 @@ def calculate_threshold_image(masks, counters=None):
     with overlapping parts (meteor detected by several observers)
     """
     total_mask = {}
-    for counter, mask in masks.iteritems():
+    for counter, mask in masks.items():
         if counters is None or counter in counters:
             try:            
-                for when, matrix in mask.iteritems():
+                for when, matrix in mask.items():
                     if when in total_mask:
                         total_mask[when] = total_mask[when] + matrix.copy()
                     else:
@@ -161,13 +161,13 @@ def random_combination(iterable, nbr_of_samples):
     """Random selection from itertools.combinations(iterable, nbr_of_samples)"""
     pool = tuple(iterable)
     population_size = len(pool)
-    indices = sorted(random.sample(xrange(population_size), nbr_of_samples))
+    indices = sorted(random.sample(range(population_size), nbr_of_samples))
     return [pool[i] for i in indices]
 
 def detect_borders(detections, minimum_width=None):
     """Wrapper function to detect the borders of a rectangle"""
     borders = {}
-    for file, detection in detections.iteritems():
+    for file, detection in detections.items():
         border = detect_border(detection, minimum_width)
         borders[file] = border
     return borders
@@ -201,7 +201,7 @@ def classify_detections(border_thresholds,border_references):
     true_positives = {} #both in reference and observation
     false_positives = {} #only in observation
     false_negatives = {} #only in reference
-    for filename, border_threshold in border_thresholds.iteritems():
+    for filename, border_threshold in border_thresholds.items():
         border_reference = border_references[filename]
         true_positive, false_positive, false_negative = classify_detection(border_threshold,border_reference)
         true_positives[filename] = true_positive

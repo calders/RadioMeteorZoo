@@ -43,12 +43,13 @@ from datetime import datetime, timedelta
 
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/aggregated"
-DATE = "20170313"
-minimum_width = 1
-start = datetime(2016, 12, 10)
-end = datetime(2016, 12, 18) #end day+1!!
-STATION = "BEOTTI"
-SHOWER = "Geminids2016"
+DATE = "20190124"
+MINIMUM_WIDTH = 1
+start = datetime(2018, 10, 2)
+end = datetime(2018, 10, 3) #end day+1!!
+SHOWER = "Draconids2018"
+STATION = "BEHUMA"
+
 
 spectrograms = []
 for result in utils.perdelta(start, end, timedelta(minutes=5)):
@@ -58,7 +59,7 @@ aggregated_identifications = {}
 csv_files = glob.glob(CSV_DIRECTORY+"*.csv")
 for spectrogram in spectrograms:
     dt = datetime.strptime(spectrogram[11:24], "%Y%m%d_%H%M")
-    print dt
+    print("{}".format(dt))
     #Step 1: read detection file
     detection_files = {}
     for csv_file in csv_files:
@@ -74,10 +75,10 @@ for spectrogram in spectrograms:
             alpha = utils.optimal_nbr_of_counters[len(detection_files)]
         else:
             alpha = 12 #we don't know better...
-        binary_image = threshold_image[threshold_image.keys()[0]].copy() 
+        binary_image = threshold_image[list(threshold_image.keys())[0]].copy() 
         binary_image[binary_image < alpha] = 0
         binary_image[binary_image >= alpha] = 1
-        border_threshold = utils.detect_border(binary_image,minimum_width=minimum_width)
+        border_threshold = utils.detect_border(binary_image,minimum_width=MINIMUM_WIDTH)
         meteors = []
         for element in border_threshold:
             dict = {'filename': spectrogram,
@@ -101,12 +102,12 @@ for spectrogram in spectrograms:
 
 ### Output aggregated BRAMS detection file ###
 output_filename = "output/aggregated/%s_%s_aggregated-%s.csv" % (SHOWER, STATION, DATE)
-with open(output_filename, 'wb') as csvfile:
+with open(output_filename, 'w') as csvfile:
     fieldnames = ['filename','file_start','start (s)','end (s)','frequency_min (Hz)','frequency_max (Hz)',
                       'type',' top (px)',' left (px)',' bottom (px)',' right (px)','sample_rate (Hz)','fft',
                       'overlap','color_min','color_max']
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)    
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames, lineterminator='\n')    
     writer.writeheader()
-    for spectrogram, data in sorted(aggregated_identifications.iteritems()):
+    for spectrogram, data in sorted(aggregated_identifications.items()):
         data.sort(key=lambda element: element[' left (px)'])
         writer.writerows(data)

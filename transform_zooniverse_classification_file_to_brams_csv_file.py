@@ -42,8 +42,8 @@ import glob
 import os
 import re
 
-DATE = "20170419"
-pattern = re.compile("RAD_BEDOUR_20161217.*_BEOTTI_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
+DATE = "20181113"
+pattern = re.compile("RAD_BEDOUR_201810.*_BEHUMA_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
 
 #remove old files
 for file in glob.glob("input/csv/*.csv"):
@@ -57,10 +57,10 @@ with open(zooniverse_classification_file) as csvfile:
          if row['workflow_version'] == "17.47":
              username = row['user_name']
              subject = json.loads(row['subject_data'])
-             if 'Filename' in subject[subject.keys()[0]]:
-                 filename = subject[subject.keys()[0]]['Filename']
+             if 'Filename' in subject[list(subject.keys())[0]]:
+                 filename = subject[list(subject.keys())[0]]['Filename']
              else:
-                 filename = subject[subject.keys()[0]]['filename']                     
+                 filename = subject[list(subject.keys())[0]]['filename']                     
              if not pattern.match(filename):
                  continue
              annotations = json.loads(row['annotations'])
@@ -95,9 +95,9 @@ with open(zooniverse_classification_file) as csvfile:
                  else:
                      output[username].append(dict)
 
-for username, data in output.iteritems():
+for username, data in output.items():
     output_filename = "input/csv/%s.csv" % username
-    with open(output_filename, 'wb') as csvfile:
+    with open(output_filename, 'w') as csvfile:
         fieldnames = ['filename','file_start','start (s)','end (s)','frequency_min (Hz)','frequency_max (Hz)',
                       'type',' top (px)',' left (px)',' bottom (px)',' right (px)','sample_rate (Hz)','fft',
                       'overlap','color_min','color_max']
