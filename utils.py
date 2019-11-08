@@ -375,3 +375,15 @@ def aggregate_rectangles(detection_files, minimum_width=0, corr_factor=0, spectr
         return (meteors, binary_image)
     else:
         return None
+    
+def get_nbr_volunteers(spectrogram, zooniverse_file):
+    """get number of volunteers from Zooniverse file
+       (deriving it from BRAMS csv files is a bad idea, because some of
+        the spectrograms have no meteors & are not mentioned in this file)
+    """
+    nbr_volunteers = 0
+    with open(zooniverse_file, 'r') as inF:
+        for line in inF:
+            if spectrogram in line:
+                nbr_volunteers += 1
+    return nbr_volunteers

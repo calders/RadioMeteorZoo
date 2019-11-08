@@ -45,10 +45,10 @@ import pickle
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/"
 MASKSIZE = (595, 864)
-DATE = "20170116"
+DATE = "20190318"
 minimum_width = 1
-start = datetime(2016, 12, 5)
-end = datetime(2016, 12, 17) #end day+1!
+start = datetime(2018, 12, 2)
+end = datetime(2018, 12, 19) #end day+1!
 STATION = "BEHUMA"
 
 spectrograms = []
@@ -72,7 +72,7 @@ for spectrogram in spectrograms:
     nbr_volunteers = len(detection_files)
     if nbr_volunteers > 0:
         alpha = utils.optimal_nbr_of_counters[len(detection_files)]
-        binary_image = threshold_image[threshold_image.keys()[0]].copy() 
+        binary_image = threshold_image[list(threshold_image.keys())[0]].copy() 
         binary_image[binary_image < alpha] = 0
         binary_image[binary_image >= alpha] = 1
         border_threshold = utils.detect_border(binary_image,minimum_width=minimum_width)
@@ -81,6 +81,6 @@ for spectrogram in spectrograms:
         identifications.append(nbr_identifications) #nbr of identifications
         volunteers.append(nbr_volunteers) #nbr of volunteers checking the file
     else:
-        print "[warning] spectrogram %s has %d volunteers" % (spectrogram,nbr_volunteers)
+        print("[warning] spectrogram {} has {} volunteers".format(spectrogram,nbr_volunteers))
 
 pickle.dump( (date_time,identifications,volunteers), open( "output/pickles/brams_zoo_meteor_identification-"+DATE+"-"+STATION+".p", "wb" ) ) 

@@ -41,17 +41,23 @@ import utils #RMZ utility functions
 from datetime import datetime, timedelta
 #Plotting libraries
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from PIL import Image
+#import matplotlib.patches as patches
+#from PIL import Image, ImageDraw
+import cv2 as cv
 
 plt.ioff() # Turn interactive plotting off
 
-PNG_DIRECTORY = "input/png/"
-CSV_DIRECTORY = "input/csv/"
-OUTPUT_DIRECTORY = "output/"
-start = datetime(2016, 12, 17)
-end = datetime(2016, 12, 18)
-station = "BEOTTI"
+PNG_DIRECTORY = "X:\\projecten\\brams\\2019\\thesis Stan\\blind_test\\"
+CSV_DIRECTORY = "X:\\projecten\\brams\\2019\\thesis Stan\\blind_test\\"
+OUTPUT_DIRECTORY = "X:\\projecten\\brams\\2019\\thesis Stan\\blind_test\\"
+start = datetime(2018, 10, 13)
+end = datetime(2018, 12, 18)
+station = "BEHUMA"
+
+def renderBoundingBoxes(target, bboxes, rgb=(255, 0, 0)):
+    r, g, b = rgb
+    for bbox in bboxes:
+        cv.rectangle(target, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (b, g, r), 1)
 
 meteors = {}
 for result in utils.perdelta(start, end, timedelta(minutes=5)):
@@ -59,7 +65,7 @@ for result in utils.perdelta(start, end, timedelta(minutes=5)):
     meteors[specgram_name] = list()
 
 for csv_file in glob.glob(CSV_DIRECTORY+"*.csv"):
-    with open(csv_file, 'rb') as csvfile:
+    with open(csv_file, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for line in reader:
             spectrogram = line['filename']
@@ -70,19 +76,15 @@ for csv_file in glob.glob(CSV_DIRECTORY+"*.csv"):
             if spectrogram in meteors.keys():
                 meteors[spectrogram].append([left, bottom, right, top])
         
-for spectrogram, meteor in meteors.iteritems():
+for spectrogram, meteor in meteors.items():
+    if not meteor:
+        continue
     try:
-        im = Image.open(PNG_DIRECTORY+spectrogram)
-        fig,ax = plt.subplots(1)
-        ax.imshow(im,zorder=0)
-        for [xstart, ystart, xstop, ystop] in meteor:
-            ax.add_patch(patches.Rectangle((xstart, ystart), xstop - xstart, ystop - ystart, edgecolor="red", fill=False))
-        plt.title(spectrogram)
-        plt.savefig(OUTPUT_DIRECTORY+spectrogram)                        
-        plt.cla()
-        im.close()
+         img = cv.imread(PNG_DIRECTORY+spectrogram)
+         renderBoundingBoxes(img, meteor)
+         cv.imwrite(OUTPUT_DIRECTORY+spectrogram[:-4]+"_annotated.png", img)
     except IOError as e:
-        print "{0} ({1})".format(e.strerror,spectrogram)
+        print ("{0} ({1})".format(e.strerror,spectrogram))
     except:
-        print "Unexpected error:", sys.exc_info()[0]
+        print ("Unexpected error:", sys.exc_info()[0])
         raise

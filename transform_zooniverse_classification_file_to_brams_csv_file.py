@@ -42,19 +42,22 @@ import glob
 import os
 import re
 
-DATE = "20181113"
-pattern = re.compile("RAD_BEDOUR_201810.*_BEHUMA_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
+DATE = "20191031"
+pattern = re.compile("RAD_BEDOUR_2019.*_BEHUMA_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
+zooniverse_classification_file = "input/lyrids2019-classifications-%s.csv" % DATE
+#zooniverse_classification_file = "input/orionids2018-classifications-%s.csv" % DATE
+#WORKFLOW_VERSION = "17.47"
+WORKFLOW_VERSION = "5.6"
 
 #remove old files
 for file in glob.glob("input/csv/*.csv"):
     os.remove(file)
 
-zooniverse_classification_file = "input/radio-meteor-zoo-classifications-%s.csv" % DATE
 output = {}
 with open(zooniverse_classification_file) as csvfile:
      classifications = csv.DictReader(csvfile)
      for row in classifications:
-         if row['workflow_version'] == "17.47":
+         if row['workflow_version'] == WORKFLOW_VERSION:
              username = row['user_name']
              subject = json.loads(row['subject_data'])
              if 'Filename' in subject[list(subject.keys())[0]]:

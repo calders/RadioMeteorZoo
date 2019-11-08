@@ -8,20 +8,20 @@ Created on Tue Aug 08 09:15:54 2017
 
 import utils
 
-INPUT_FILES = {"20161210_0130": ["input/csv/not-logged-in-b0a850b9d522d96faa82.csv"],
+INPUT_FILES = {"20161210_0130": ["input/csv/not-logged-in-4fad9a359df7c642c960.csv "],
                "20161210_0155": ["input/csv/lwang752.csv"],
                "20161210_0215": ["input/csv/sdevnan.csv"],
                "20161210_0230": ["input/csv/Arabmoney3000.csv"],
                "20161210_0320": ["input/csv/airvolk.csv"],
-               "20161210_0445": ["input/csv/not-logged-in-1dbfa300448b6dccffe7.csv"],
-               "20161210_0450": ["input/csv/not-logged-in-ae80753362a4a90a819a.csv"],
-               "20161210_0505": ["input/csv/not-logged-in-1dbfa300448b6dccffe7.csv"],
+               "20161210_0445": ["input/csv/not-logged-in-7452d1d2f47c73099a30.csv"],
+               "20161210_0450": ["input/csv/not-logged-in-1681fe4d7a497e1751b3.csv"],
+               "20161210_0505": ["input/csv/not-logged-in-7452d1d2f47c73099a30.csv"],
                "20161210_0530": ["input/csv/joyzheng8.csv"],
-               "20161210_0540": ["input/csv/not-logged-in-c6e6fcd021551140a57c.csv"],
+               "20161210_0540": ["input/csv/not-logged-in-672958733cffc2995843.csv"],
                "20161210_0600": ["input/csv/Arabmoney3000.csv"],
-               "20161210_0625": ["input/csv/not-logged-in-534b670e40a598857c12.csv"],
+               "20161210_0625": ["input/csv/not-logged-in-e688e6955d346e4d3d36.csv"],
                "20161210_0650": ["input/csv/airvolk.csv"],
-               "20161210_0710": ["input/csv/not-logged-in-3d2c0b879cea54123233.csv"]
+               "20161210_0710": ["input/csv/not-logged-in-4bc131f3a6089848f012.csv"]
               }
 STANDARD_FILES = ["output/aggregated/Geminids2016_BEOTTI_aggregated-20170620-run1.csv",
                   "output/aggregated/Geminids2016_BEOTTI_aggregated-20170620-run2.csv"]

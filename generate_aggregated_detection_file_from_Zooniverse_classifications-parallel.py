@@ -44,12 +44,12 @@ from multiprocessing import Pool, freeze_support
 
 CSV_DIRECTORY = "input/csv/"
 OUTPUT_DIRECTORY = "output/aggregated"
-DATE = "20170419"
+DATE = "20190124"
 MINIMUM_WIDTH = 1
-start = datetime(2016, 12, 17)
-end = datetime(2016, 12, 18) #end day+1!!
-STATION = "BEOTTI"
-SHOWER = "Geminids2016"
+start = datetime(2018, 10, 2)
+end = datetime(2018, 10, 3) #end day+1!!
+SHOWER = "Draconids2018"
+STATION = "BEHUMA"
 NBR_WORKERS = 16
 
 def process_specgrams(spectrograms, csv_files, minimum_width, pool):
@@ -64,7 +64,7 @@ def process_specgram(args):
     spectrogram, csv_files, minimum_width = args
     meteors = []
     dt = datetime.strptime(spectrogram[11:24], "%Y%m%d_%H%M")
-    print dt
+    print("datetime: {}".format(dt))
     #Step 1: read detection file
     detection_files = {}
     for csv_file in csv_files:
