@@ -42,12 +42,10 @@ import glob
 import os
 import re
 
-DATE = "20191031"
-pattern = re.compile("RAD_BEDOUR_2019.*_BEHUMA_SYS001.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
-zooniverse_classification_file = "input/lyrids2019-classifications-%s.csv" % DATE
-#zooniverse_classification_file = "input/orionids2018-classifications-%s.csv" % DATE
-#WORKFLOW_VERSION = "17.47"
-WORKFLOW_VERSION = "5.6"
+pattern = re.compile("RAD_BEDOUR_2021.*_BEHUMA_SYS.*.png") #RAD_BEDOUR_20160810_2300_BEHUMA_SYS001.png
+zooniverse_classification_file = "input/quadrantids2021-classifications-20210310.csv"
+
+#WORKFLOW_VERSION = "5.5"
 
 #remove old files
 for file in glob.glob("input/csv/*.csv"):
@@ -57,13 +55,16 @@ output = {}
 with open(zooniverse_classification_file) as csvfile:
      classifications = csv.DictReader(csvfile)
      for row in classifications:
-         if row['workflow_version'] == WORKFLOW_VERSION:
+         #if row['workflow_version'] == WORKFLOW_VERSION:
+         if 1 == 1:
              username = row['user_name']
              subject = json.loads(row['subject_data'])
              if 'Filename' in subject[list(subject.keys())[0]]:
                  filename = subject[list(subject.keys())[0]]['Filename']
+             elif 'filename' in subject[list(subject.keys())[0]]:
+                 filename = subject[list(subject.keys())[0]]['filename']
              else:
-                 filename = subject[list(subject.keys())[0]]['filename']                     
+                 continue
              if not pattern.match(filename):
                  continue
              annotations = json.loads(row['annotations'])

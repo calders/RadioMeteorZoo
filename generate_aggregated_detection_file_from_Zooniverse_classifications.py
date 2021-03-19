@@ -42,18 +42,18 @@ import glob
 from datetime import datetime, timedelta
 
 CSV_DIRECTORY = "input/csv/"
-ZOONIVERSE_FILE = "input/lyrids2019-classifications-20191031.csv"
 OUTPUT_DIRECTORY = "output/aggregated"
-DATE = "20191107"
+DATE = "20210310"
+ZOONIVERSE_FILE = "input/quadrantids2021-classifications-20210310.csv"
 MINIMUM_WIDTH = 1
-start = datetime(2019, 4, 16)
-end = datetime(2019, 4, 27) #end day+1!!
-SHOWER = "Lyrids2019"
+start = datetime(2021, 1, 1)
+end = datetime(2021, 1, 9) #end day+1!!
+SHOWER = "Quadrantids2021"
 STATION = "BEHUMA"
 
 spectrograms = []
 for result in utils.perdelta(start, end, timedelta(minutes=5)):
-     spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_"+STATION+"_SYS001.png")
+    spectrograms.append("RAD_BEDOUR_"+datetime.strftime(result,"%Y%m%d_%H%M")+"_"+STATION+"_SYS001.png")
 
 aggregated_identifications = {}
 csv_files = glob.glob(CSV_DIRECTORY+"*.csv")
@@ -72,6 +72,7 @@ for spectrogram in spectrograms:
     #nbr_volunteers = len(detection_files) # incorrect if some users count 0 meteors in spectrogram
     nbr_volunteers = utils.get_nbr_volunteers(spectrogram, ZOONIVERSE_FILE)
     if nbr_volunteers > 0:
+        meteors = []
         if nbr_volunteers <= 35:
             alpha = utils.optimal_nbr_of_counters[nbr_volunteers]
         else:
@@ -81,7 +82,6 @@ for spectrogram in spectrograms:
             binary_image[binary_image < alpha] = 0
             binary_image[binary_image >= alpha] = 1
             border_threshold = utils.detect_border(binary_image,minimum_width=MINIMUM_WIDTH)
-            meteors = []
             for element in border_threshold:
                 dict = {'filename': spectrogram,
                        'file_start': 'unk',
